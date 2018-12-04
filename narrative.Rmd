@@ -1,0 +1,316 @@
+---
+title: "Multivar stats final project"
+author: "Renata Diaz"
+date: "11/23/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(vegan)
+library(ca)
+  
+```
+
+
+## Get data
+
+* Download rodent and plant data from the Portal Project repo:
+
+```{r download data, eval = T}
+source('R/store_rodent_data.R')
+source('R/store_plant_data.R')
+
+store_rodent_data()
+store_plant_data()
+store_plant_species_info()
+```
+
+Adjust data to compensate for irregular trapping and census effort.
+
+### Plant data
+* Extracted summer & winter plant censuses for all years 
+* Standardized plant abundances according to sampling effort
+* Kept seasons separate
+
+### Rodent data
+* Rodent censuses on control plots for all years, restricted to granivores
+* Standardized according to sampling effort (per census period)
+* Summed across all months in each calendar year
+
+```{r adjust data, eval = T}
+rodents <- read.csv('data/rodents-raw.csv', stringsAsFactors = F)
+winter_plants <-read.csv('data/winter-plants-raw.csv', stringsAsFactors = F)
+summer_plants <- read.csv('data/summer-plants-raw.csv', stringsAsFactors = F)
+all_plants <- rbind(winter_plants, summer_plants)
+
+source('R/store_adjusted_data.R')
+store_adjusted_rodent_data(rodents, all_plants)
+store_adjusted_plant_data(all_plants)
+
+rm(list=ls())
+```
+
+## PCoA 
+
+* Transformed raw abundance values using the Wisconsin transformation, and then created a Bray-Curtis dissimilarity matrix for each community.
+* Ran PCoA on the dissimilarity matrices, separately for each community. 
+
+### Summer PCoA
+
+```{r summer pcoa, echo = T} 
+all_plants <- read.csv('data/plants-adjusted.csv',
+                          stringsAsFactors = F)
+summer_plants <- all_plants %>%
+  filter(season == 'summer', treatment == 'control') %>%
+  select(-season, -treatment)
+
+summer_plants_wis <- vegan::wisconsin(summer_plants[,2:ncol(summer_plants)])
+
+summer_dist_mat <- vegdist(summer_plants_wis, 'bray')
+  
+summer_pcoa <- cmdscale(summer_dist_mat, k = nrow(summer_plants_wis) - 1, eig = T)
+
+
+  
+# Proportion of variance table 
+  eigenvalues <- summer_pcoa$eig[1:nrow(summer_plants_wis)-1]
+  propVar <- eigenvalues/sum(eigenvalues)
+  cumVar <- cumsum(propVar)
+  Summer_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
+  
+  Summer_PCoA_Table[1:15,]
+  
+  
+# Scree plot:
+  plot(eigenvalues)
+  lines(lowess(eigenvalues))
+  
+  
+
+#ordiplot(scores(summer_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Summer plant PCoA")
+## species scores not available
+#abline(h = 0, lty = 3)
+#abline(v = 0, lty = 3)
+
+# Add species
+
+species_pc <- wascores(summer_pcoa$points[, 1:3], summer_plants_wis)
+#text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
+  
+```
+
+
+There seems to be an inflection point in the scree plot around axis 3. 
+
+Moving forward, keeping the first 3 axes as predictor variables for the rodent community. 
+
+```{r save summer axes, echo = F}
+
+write.csv(species_pc, 'models/summer_species_scores.csv', row.names = T)
+
+summer_vals <- cbind(summer_plants$year, summer_pcoa$points[,1:3])
+  
+  season_names <- rep("SummerPCoAxis_", 3) %>%
+    paste0(1:3)
+  season_names <- c('year', season_names)
+  colnames(summer_vals) <- season_names
+  
+  
+  write.csv(summer_vals, 'models/summer_pcoa_axes.csv', row.names = F)
+ 
+```
+
+
+
+### Winter PCoA
+
+```{r winter pcoa, echo = T} 
+
+winter_plants <- all_plants %>%
+  filter(season == 'winter', treatment == 'control') %>%
+  select(-season, -treatment)
+
+winter_plants_wis <- vegan::wisconsin(winter_plants[,2:ncol(winter_plants)])
+
+
+winter_dist_mat <- vegdist(winter_plants_wis, 'bray')
+  
+winter_pcoa <- cmdscale(winter_dist_mat, k = nrow(winter_plants_wis) - 1, eig = T)
+  
+# Proportion of variance table 
+  eigenvalues <- winter_pcoa$eig[1:nrow(winter_plants_wis)-1]
+  propVar <- eigenvalues/sum(eigenvalues)
+  cumVar <- cumsum(propVar)
+  winter_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
+  
+  winter_PCoA_Table[1:15,]
+  
+  
+# Scree plot:
+  plot(eigenvalues)
+  lines(lowess(eigenvalues))
+  
+
+#ordiplot(scores(winter_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Winter plant PCoA")
+## species scores not available
+#abline(h = 0, lty = 3)
+#abline(v = 0, lty = 3)
+
+# Add species
+
+species_pc <- wascores(winter_pcoa$points[, 1:3], winter_plants_wis)
+# text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
+
+```
+
+
+There seems to be an inflection point in the scree plot around axis 2 or 3. Since stopping at 2 would only capture 35% of variation, going to go for 3. 
+
+
+```{r save winter axes, echo = F}
+
+write.csv(species_pc, 'models/winter_species_scores.csv', row.names = T)
+
+winter_vals <- cbind(winter_plants$year, winter_pcoa$points[,1:3])
+  
+  season_names <- rep("WinterPCoAxis_", 3) %>%
+    paste0(1:3)
+  season_names <- c('year', season_names)
+  colnames(winter_vals) <- season_names
+  
+  
+  write.csv(winter_vals, 'models/winter_pcoa_axes.csv', row.names = F)
+ 
+
+```
+
+### Explore the PCoA axes
+
+```{r explore axes} 
+
+summer_axes <- read.csv('models/summer_pcoa_axes.csv', stringsAsFactors = F)
+winter_axes <- read.csv('models/winter_pcoa_axes.csv', stringsAsFactors = F)
+summer_scores <- read.csv('models/summer_species_scores.csv',
+                          stringsAsFactors = F)
+winter_scores <- read.csv('models/winter_species_scores.csv',
+                          stringsAsFactors = F)
+
+colnames(winter_scores) <- c('speciescode', 'waxis1', 
+                             'waxis2', 'waxis3')
+colnames(summer_scores) <- c('speciescode', 'saxis1', 
+                             'saxis2', 'saxis3')
+
+# Compile species info & load
+
+source('R/compile_species_info.R')
+compile_species_info()
+
+plant_info <- read.csv('data/compiled_plant_species_data.csv', stringsAsFactors = F)
+
+plant_info <- select(plant_info, speciescode, community, seed_mass)
+
+winter_scores <- left_join(winter_scores, plant_info, by = 'speciescode')
+
+summer_scores <- left_join(summer_scores, plant_info, by = 'speciescode')
+
+## Does seed mass predict scores
+
+par(mfrow = c(2, 3))
+plot(summer_scores$seed_mass, summer_scores$saxis1)
+abline(lm(summer_scores$saxis1~summer_scores$seed_mass), col="red")
+plot(summer_scores$seed_mass, summer_scores$saxis2)
+abline(lm(summer_scores$saxis2~summer_scores$seed_mass), col="red")
+plot(summer_scores$seed_mass, summer_scores$saxis3)
+abline(lm(summer_scores$saxis3~summer_scores$seed_mass), col="red")
+
+plot(winter_scores$seed_mass, winter_scores$waxis1)
+abline(lm(winter_scores$waxis1~winter_scores$seed_mass), col="red")
+plot(winter_scores$seed_mass, winter_scores$waxis2)
+abline(lm(winter_scores$waxis2~winter_scores$seed_mass), col="red")
+plot(winter_scores$seed_mass, winter_scores$waxis3)
+abline(lm(winter_scores$waxis3~winter_scores$seed_mass), col="red")
+
+source('R/get_seed_mass_regression.R')
+
+for(i in 1:3) {
+this_regression <- get_seed_mass_regression(summer_scores, i + 1)
+  print(this_regression)
+}
+
+
+for(i in 1:3) {
+this_regression <- get_seed_mass_regression(winter_scores, i + 1)
+  print(this_regression)
+}
+
+# Insomuch as we have it, seed size data doesn't predict axis scores
+
+# for ordiplots, add colors to scores
+
+community_colors <- summer_scores %>%
+  select(community) %>%
+  distinct()
+
+community_colors$colour <- viridis::plasma(n = 7)
+
+winter_scores <- left_join(winter_scores, community_colors, by = 'community')
+
+summer_scores <- left_join(summer_scores, community_colors, by = 'community')
+
+par(mfrow = c(1,1))
+
+## Ordiplots
+
+ordiplot(summer_scores[, c(2, 3)], type = "n", cex = 1, main = "Summer plant PCoA")
+
+abline(h = 0, lty = 3)
+abline(v = 0, lty = 3)
+
+# Add species
+
+ text(summer_scores[, c(2, 3)], summer_scores$speciescode, cex = 0.7, col = summer_scores$colour)
+ legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
+        cex = 0.5)
+
+ 
+
+
+ordiplot(winter_scores[, c(2, 3)], type = "n", cex = 1, main = "Winter plant PCoA")
+
+abline(h = 0, lty = 3)
+abline(v = 0, lty = 3)
+
+# Add species
+
+ text(winter_scores[, c(2, 3)], winter_scores$speciescode, cex = 0.7, col = winter_scores$colour)
+ legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
+        cex = 0.5)
+
+ 
+ ### Axes through time
+ 
+all_scores <- inner_join(summer_axes, winter_axes, by = 'year')
+
+axismin = min(all_scores[,2:7])
+axismax = max(all_scores[,2:7])
+
+axis_cols <- viridis::viridis(6)
+cpt_years <- c(1984, 1990, 1999, 2010)
+plot(all_scores$year, all_scores$SummerPCoAxis_1, type ='n', ylim = c(axismin, axismax))
+for(i in 1:6) {
+  lines(all_scores$year, all_scores[,i+1], col = axis_cols[i])
+}
+for(i in 1:4) {
+  abline(v = cpt_years[i], col = 'red')
+}
+legend(x = 'bottomright', legend = colnames(all_scores)[2:7],fill = axis_cols,
+        cex = 0.5)
+
+
+plot(all_scores$year, all_scores$WinterPCoAxis_1, type = 'l', col = axis_cols[4])
+abline(v = cpt_years[2], col = 'red')
+
+
+```

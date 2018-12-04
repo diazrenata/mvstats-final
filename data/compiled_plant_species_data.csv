@@ -1,0 +1,236 @@
+"speciescode","genus","species","community","seed_mass"
+"carl.line","Carlowrightia","linearifolia","Shrub",NA
+"tria.port","Trianthema","portulacastrum","Summer Annual",NA
+"amar.palm","Amaranthus","palmeri","Summer Annual",NA
+"atri.acan","Atriplex","acanthocarpa","Shrub",NA
+"atri.cane","Atriplex","canescens","Shrub",NA
+"atri.eleg","Atriplex","elegans","Summer Annual",NA
+"atri.wrig","Atriplex","wrightii","Summer Annual",NA
+"chen.frem","Chenopodium","fremontii","Summer and Winter Annual",0.39
+"chen.sp","Chenopodium","sp.","Unknown",NA
+"bray.dens","Guilleminea","densa","Perennial Forb",NA
+"sals.kali","Kali","tragus","Summer Annual",NA
+"euro.lana","Krascheninnikovia","lanata","Shrub",NA
+"tide.lanu","Tidestromia","lanuginosa","Summer Annual",NA
+"tide.sp","Tidestromia","sp.","Unknown",NA
+"sper.echi","Spermolepis","echinata","Winter Annual",0.62
+"funa.hart","Funastrum","hartwegii","Perennial Forb",NA
+"dich.pulc","Dichlostemma","capitatum","Perennial Forb",NA
+"yucc.elat","Yucca","elata","Shrub",NA
+"ambr.arte","Ambrosia","artemisiifolia","Summer and Winter Annual",3.99
+"ambr.conf","Ambrosia","confertiflora","Perennial Forb",NA
+"ambr.sals","Ambrosia","salsola","Shrub",NA
+"bahi.absi","Bahia","absinthifolia","Perennial Forb",NA
+"bahi.bite","Bahia","biternata","Summer Annual",NA
+"bail.mult","Baileya","multiradiata","Summer and Winter Annual",0.43
+"bric.eupa","Brickellia","eupatorioides","Subshrub",NA
+"caly.wrig","Calycoseris","wrightii","Winter Annual",0.72
+"chae.stev","Chaenactis","stevioides","Winter Annual",0.47
+"chae.eric","Chaetopappa","ericoides","Perennial Forb",NA
+"cirs.neom","Cirsium","neomexicanum","Perennial Forb",NA
+"erig.conc","Erigeron","concinnus","Subshrub",NA
+"erig.dive","Erigeron","divergens","Summer and Winter Annual",0.03
+"erig.sp","Erigeron","sp.","Unknown",NA
+"flou.cern","Flourensia","cernua","Shrub",NA
+"guti.saro","Gutierrezia","microcephala","Shrub",NA
+"hapl.sp","Haplopappus","sp.","Subshrub",NA
+"hapl.spin","Haplopappus","spinulosus","Subshrub",NA
+"heli.annu","Helianthus","annuus","Summer Annual",NA
+"hete.suba","Heterotheca","subaxillaris","Summer and Winter Annual",NA
+"hapl.tenu","Isocoma","tenuisecta","Subshrub",NA
+"laen.coul","Laennecia","coulteri","Summer and Winter Annual",NA
+"hapl.grac","Machaeranthera","gracilis","Summer and Winter Annual",0.18
+"mach.tanr","Machaeranthera","tagetina","Summer Annual",NA
+"mala.fend","Malacothrix","fendleri","Winter Annual",0.1
+"mala.sp","Malacothrix","sp.","Winter Annual",NA
+"part.inca","Parthenium","incanum","Shrub",NA
+"pect.papp","Pectis","papposa","Summer Annual",NA
+"pere.nana","Perezia","nana","Perennial Forb",NA
+"pseu.cane","Pseudognaphalium","canescens","Summer and Winter Annual",NA
+"rafi.neom","Rafinesquia","neomexicana","Summer and Winter Annual",NA
+"sanv.aber","Sanvitalia","aberti","Summer Annual",NA
+"step.exig","Stephanomeria","exigua","Winter Annual",0.64
+"dyss.pent","Thymophylla","pentachaeta","Subshrub",NA
+"micr.lene","Uropappus","lindleyi","Winter Annual",NA
+"micr.sp","Uropappus","sp.","Winter Annual",NA
+"verb.ence","Verbesina","encelioides","Summer Annual",NA
+"xant.spin","Xanthisma","spinulosum","Subshrub",NA
+"zinn.pumi","Zinnia","acerosa","Subshrub",NA
+"zinn.gran","Zinnia","grandiflora","Subshrub",NA
+"zinn.sp","Zinnia","sp.","Subshrub",NA
+"amsi.inte","Amsinckia","menziesii","Winter Annual",NA
+"amsi.sp","Amsinckia","sp.","Winter Annual",NA
+"amsi.tess","Amsinckia","tessellata","Winter Annual",NA
+"cryp.cras","Cryptantha","crassisepala","Winter Annual",0.3
+"cryp.micr","Cryptantha","micrantha","Winter Annual",0.02
+"cryp.sp","Cryptantha","sp.","Winter Annual",NA
+"cryp.sp2","Cryptantha","sp.","Winter Annual",NA
+"lapp.redo","Lappula","occidentalis","Winter Annual",NA
+"nama.hisp","Nama","hispidum","Winter Annual",NA
+"pect.recu","Pectocarya","recurvata","Winter Annual",0.95
+"pect.sp","Pectocarya","sp.","Winter Annual",NA
+"phac.ariz","Phacelia","arizonica","Winter Annual",NA
+"plag.ariz","Plagiobothrys","arizonicus","Winter Annual",1.83
+"chor.tene","Chorispora","tenella","Winter Annual",NA
+"desc.obtu","Descurainia","obtusa","Winter Annual",NA
+"desc.pinn","Descurainia","pinnata","Winter Annual",0.1
+"desc.sp","Descurainia","sp.","Winter Annual",NA
+"dith.wisl","Dimorphocarpa","wislizeni","Summer and Winter Annual",3.2
+"lepi.lasi","Lepidium","lasiocarpum","Winter Annual",0.3
+"lepi.sp","Lepidium","sp.","Winter Annual",NA
+"lesq.gord","Physaria","gordoni","Winter Annual",NA
+"sisy.irio","Sisymbrium","irio","Winter Annual",NA
+"unkn.must","Unknown","mustard","Winter Annual",NA
+"cyli.fulg","Cylindropuntia","fulgida","Shrub",NA
+"cyli.sp","Cylindropuntia","sp.","Shrub",NA
+"opun.basi","Opuntia","basilaris","Shrub",NA
+"opun.poly","Opuntia","polyacantha","Shrub",NA
+"opun.sp","Opuntia","sp.","Shrub",NA
+"comm.erec","Commelina","erecta","Shrub",NA
+"cusc.mitr","Cuscuta","mitriformis","Perennial Forb",NA
+"cusc.sp","Cuscuta","sp.","Summer Annual",NA
+"cusc.tube","Cuscuta","tuberculata","Perennial Forb",NA
+"ipom.cost","Ipomoea","costellata","Summer Annual",NA
+"apod.undu","Apodanthera","undulata","Perennial Forb",NA
+"ephe.trif","Ephedra","trifurca","Shrub",NA
+"crot.cory","Croton","potsii","Subshrub",NA
+"euph.exst","Euphorbia","exstipulata","Summer Annual",NA
+"euph.fend","Euphorbia","fendleri","Summer Annual",NA
+"euph.micr","Euphorbia","micromera","Summer Annual",NA
+"euph.serp","Euphorbia","serpyllifolia","Summer Annual",NA
+"euph.serr","Euphorbia","serrula","Summer Annual",NA
+"euph.sp","Euphorbia","sp.","Summer and Winter Annual",NA
+"erod.cicu","Erodium","cicutarium","Summer and Winter Annual",NA
+"erod.texa","Erodium","texanum","Winter Annual",2.51
+"acac.cons","Acacia","constricta","Shrub",NA
+"acac.greg","Acacia","greggii","Shrub",NA
+"astr.allo","Astragalus","allochrous","Winter Annual",4.7
+"astr.nutt","Astragalus","nuttallianus","Winter Annual",1.53
+"astr.sp","Astragalus","sp.","Winter Annual",NA
+"cass.lept","Chamaecrista","nictitans","Summer Annual",NA
+"crot.pumi","Crotalaria","pumila","Summer Annual",NA
+"dale.brac","Dalea","brachystachya","Summer and Winter Annual",NA
+"dale.nana","Dalea","nana","Perennial Forb",NA
+"dale.pogo","Dalea","pogonathera","Perennial Forb",NA
+"dale.sp","Dalea","sp.","Unknown",NA
+"hoff.dens","Hoffmanseggia","glauca","Perennial Forb",NA
+"lupi.brev","Lupinus","brevicaulis","Winter Annual",NA
+"lupi.conc","Lupinus","concinnus","Winter Annual",7.5
+"lupi.sp","Lupinus","sp.","Winter Annual",NA
+"lupi.sp2","Lupinus","sp.","Winter Annual",NA
+"mimo.acul","Mimosa","aculeaticarpa","Shrub",NA
+"pros.glan","Prosopis","glandulosa","Shrub",NA
+"pros.sp","Prosopis","sp.","Shrub",NA
+"pros.velu","Prosopis","velutina","Shrub",NA
+"cass.bauh","Senna","bauhinoides","Subshrub",NA
+"abut.parv","Abutilon","parvulum","Perennial Forb",NA
+"sida.phys","Rhynchosida","physocalyx","Subshrub",NA
+"sida.proc","Sida","abutifolia","Perennial Forb",NA
+"sida.neom","Sida","neomexicana","Perennial Forb",NA
+"sida.sp","Sida","sp.","Summer Annual",NA
+"sida.spin","Sida","spinosa","Summer Annual",NA
+"spha.angu","Sphaeralcea","angustifolia","Subshrub",NA
+"spha.coul","Sphaeralcea","coulteri","Summer and Winter Annual",NA
+"spha.hast","Sphaeralcea","hastulata","Subshrub",NA
+"spha.inca","Sphaeralcea","incana","Subshrub",NA
+"spha.laxa","Sphaeralcea","laxa","Subshrub",NA
+"spha.sp","Sphaeralcea","sp.","Unknown",NA
+"prob.parv","Proboscidea","parviflora","Summer Annual",NA
+"moll.cerv","Mollugo","cerviana","Summer Annual",NA
+"moll.sp","Mollugo","sp.","Summer Annual",NA
+"moll.vert","Mollugo","verticillata","Summer Annual",NA
+"tali.angu","Phemeranthus","angustissimum","Perennial Forb",NA
+"tali.aura","Phemeranthus","aurantiacus","Perennial Forb",NA
+"tali.sp","Phemeranthus","sp.","Perennial Forb",NA
+"alli.inca","Allionia","incarnata","Perennial Forb",NA
+"alli.sp","Allionia","sp.","Perennial Forb",NA
+"ammo.chen","Ammocodon","chenopodioides","Perennial Forb",NA
+"boer.cocc","Boerhavia","coccinea","Perennial Forb",NA
+"boer.coul","Boerhavia","coulteri","Summer Annual",NA
+"boer.inte","Boerhavia","intermedia","Summer Annual",NA
+"boer.sp","Boerhavia","sp.","Summer Annual",NA
+"boer.torr","Boerhavia","spicata","Summer Annual",NA
+"oeno.prim","Oenothera","primiveris","Winter Annual",2.32
+"oeno.sp","Oenothera","sp.","Winter Annual",NA
+"esch.mexi","Eschscholzia","californica","Winter Annual",1.5
+"lina.texa","Nuttallanthus","texanus","Winter Annual",0.02
+"plan.purs","Plantago","patagonica","Winter Annual",NA
+"aris.adsc","Aristida","adscensionis","Summer Annual",NA
+"aris.long","Aristida","purpurea","Perennial Grass",NA
+"aris.sp","Aristida","sp.","Unknown",NA
+"aris.hamu","Aristida","ternipes","Perennial Grass",NA
+"both.barb","Bothriochloa","barbinodis","Perennial Grass",NA
+"bout.aris","Bouteloua","aristidoides","Summer Annual",NA
+"bout.sp","Bouteloua","sp.","Summer Annual",NA
+"pani.ariz","Brachiaria","arizonica","Summer Annual",NA
+"brom.rube","Bromus","rubens","Winter Annual",NA
+"bout.dact","Buchloe","dactyloides","Perennial Grass",NA
+"chlo.virg","Chloris","virgata","Summer Annual",NA
+"bout.barb","Chondrosum","barbatum","Summer Annual",NA
+"bout.erio","Chondrosum","eriopodum","Perennial Grass",NA
+"tric.cali","Digitaria","californica","Perennial Grass",NA
+"sita.hyst","Elymus","elymoides","Perennial Grass",NA
+"enne.desv","Enneapogon","desvauxii","Perennial Grass",NA
+"erag.cili","Eragrostis","cilianensis","Summer Annual",NA
+"erag.inte","Eragrostis","intermedia","Perennial Grass",NA
+"erag.lehm","Eragrostis","lehmanniana","Perennial Grass",NA
+"erag.arid","Eragrostis","pectinacea","Summer Annual",NA
+"erag.sp","Eragrostis","sp.","Perennial Grass",NA
+"erio.lemm","Eriochloa","acuminata","Summer and Winter Annual",NA
+"trid.pulc","Erioneuron","pulchellum","Perennial Grass",NA
+"hila.muti","Hilaria","mutica","Perennial Grass",NA
+"lycu.phle","Lycurus","phleoides","Perennial Grass",NA
+"muhl.port","Muhlenbergia","porteri","Perennial Grass",NA
+"muhl.sp","Muhlenbergia","sp.","Unknown",NA
+"pani.hirt","Panicum","hirticaule","Summer and Winter Annual",0.71
+"pani.mili","Panicum","miliaceum","Summer Annual",NA
+"pani.sp","Panicum","sp.","Summer Annual",NA
+"schi.barb","Schismus","barbatus","Winter Annual",NA
+"seta.leuc","Setaria","leucopila","Perennial Grass",NA
+"seta.macr","Setaria","macrostachya","Perennial Grass",NA
+"spor.cont","Sporobolus","contractus","Perennial Grass",NA
+"trag.bert","Tragus","berteronianus","Summer Annual",NA
+"annu.gras","Unknown","annual grass","Unknown",NA
+"annu.gras1","Unknown","annual grass","Unknown",NA
+"annu.gras2","Unknown","annual grass","Unknown",NA
+"unkn.gras","Unknown","grass","Unknown",NA
+"unkn.gras2","Unknown","grass","Unknown",NA
+"pere.gras","Unknown","perenial grass","Perennial Grass",NA
+"vulp.octo","Vulpia","octoflora","Winter Annual",0.38
+"eria.diff","Eriastrum","diffusum","Winter Annual",0.19
+"gili.mexi","Gilia","mexicana","Winter Annual",NA
+"gili.sinu","Gilia","sinuata","Winter Annual",0.31
+"lina.bige","Linanthus","bigelovii","Winter Annual",NA
+"lina.sp","Linanthus","sp.","Winter Annual",NA
+"poly.twee","Polygala","tweedyi","Subshrub",NA
+"erio.aber","Eriogonum","abertianum","Summer and Winter Annual",0.22
+"erio.poly","Eriogonum","polycladon","Summer Annual",NA
+"rume.alti","Rumex","altissimus","Perennial Forb",NA
+"rume.angu","Rumex","crispus","Perennial Forb",NA
+"rume.hyme","Rumex","hymenosepalus","Perennial Forb",NA
+"port.parv","Portulaca","halimoides","Summer Annual",NA
+"port.sp","Portulaca","sp.","Summer Annual",NA
+"port.suff","Portulaca","suffretescens","Subshrub",NA
+"andr.occi","Androsace","occidentalis","Winter Annual",NA
+"delp.sp","Delphinium","sp.","Winter Annual",NA
+"lyci.ande","Lycium","andersonii","Shrub",NA
+"lyci.torr","Lycium","torreyi","Shrub",NA
+"sola.elea","Solanum","elaeagnifolium","Subshrub",NA
+"sola.rost","Solanum","rostratum","Summer Annual",NA
+"papp.vagi","Unknown","","Unknown",NA
+"annu.forb","Unknown","annual forb","Unknown",NA
+"annu.forb2","Unknown","annual forb","Unknown",NA
+"annu.forb3","Unknown","annual forb","Unknown",NA
+"annu.forb4","Unknown","annual forb","Unknown",NA
+"annu.forb5","Unknown","annual forb","Unknown",NA
+"unkn.forb","Unknown","forb","Unknown",NA
+"unkn.forb2","Unknown","forb","Unknown",NA
+"pere.forb","Unknown","perennial forb","Perennial Forb",NA
+"unkn","Unknown","plant","Unknown",NA
+"unkn.shrb","Unknown","shrub","Shrub",NA
+"tetr.coul","Tetraclea","coulteri","Subshrub",NA
+"kall.cali","Kallstroemia","californica","Summer Annual",NA
+"kall.gran","Kallstroemia","grandiflora","Summer Annual",NA
+"kall.hirs","Kallstroemia","hirsutissima","Summer Annual",NA
+"kall.sp","Kallstroemia","sp.","Summer Annual",NA
+"larr.trid","Larrea","tridentata","Shrub",NA
