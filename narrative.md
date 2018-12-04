@@ -70,6 +70,8 @@ summer_plants <- all_plants %>%
   filter(season == 'summer', treatment == 'control') %>%
   select(-season, -treatment)
 
+summer_plants <- summer_plants[ , which(colSums(summer_plants) > 0)]
+
 summer_plants_wis <- vegan::wisconsin(summer_plants[,2:ncol(summer_plants)])
 
 summer_dist_mat <- vegdist(summer_plants_wis, 'bray')
@@ -137,6 +139,10 @@ Moving forward, keeping the first 3 axes as predictor variables for the rodent c
 winter_plants <- all_plants %>%
   filter(season == 'winter', treatment == 'control') %>%
   select(-season, -treatment)
+
+
+winter_plants <- winter_plants[ , which(colSums(winter_plants) > 0)]
+
 
 winter_plants_wis <- vegan::wisconsin(winter_plants[,2:ncol(winter_plants)])
 
@@ -369,28 +375,28 @@ abline(v = 0, lty = 3)
 ``` r
  ### Axes through time
  
-all_scores <- inner_join(summer_axes, winter_axes, by = 'year')
+all_axes <- inner_join(summer_axes, winter_axes, by = 'year')
 
-axismin = min(all_scores[,2:7])
-axismax = max(all_scores[,2:7])
+axismin = min(all_axes[,2:7])
+axismax = max(all_axes[,2:7])
 
 axis_cols <- viridis::viridis(6)
 cpt_years <- c(1984, 1990, 1999, 2010)
-plot(all_scores$year, all_scores$SummerPCoAxis_1, type ='n', ylim = c(axismin, axismax))
+plot(all_axes$year, all_axes$SummerPCoAxis_1, type ='n', ylim = c(axismin, axismax))
 for(i in 1:6) {
-  lines(all_scores$year, all_scores[,i+1], col = axis_cols[i])
+  lines(all_axes$year, all_axes[,i+1], col = axis_cols[i])
 }
 for(i in 1:4) {
   abline(v = cpt_years[i], col = 'red')
 }
-legend(x = 'bottomright', legend = colnames(all_scores)[2:7],fill = axis_cols,
+legend(x = 'bottomright', legend = colnames(all_axes)[2:7],fill = axis_cols,
         cex = 0.5)
 ```
 
 ![](narrative_files/figure-markdown_github/explore%20axes-4.png)
 
 ``` r
-plot(all_scores$year, all_scores$WinterPCoAxis_1, type = 'l', col = axis_cols[4])
+plot(all_axes$year, all_axes$WinterPCoAxis_1, type = 'l', col = axis_cols[4])
 abline(v = cpt_years[2], col = 'red')
 ```
 
@@ -457,7 +463,7 @@ anova(rodents_prda, step = 1000)
     ## 
     ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(pred_vals_y$year), data = pred_vals_noy)
     ##          Df Variance      F Pr(>F)  
-    ## Model     6 0.032671 1.8312  0.026 *
+    ## Model     6 0.032671 1.8312  0.033 *
     ## Residual 25 0.074337                
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -473,12 +479,12 @@ anova(rodents_prda, by = "axis", step = 1000)
     ## 
     ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(pred_vals_y$year), data = pred_vals_noy)
     ##          Df Variance      F Pr(>F)
-    ## RDA1      1 0.014721 4.9507  0.175
-    ## RDA2      1 0.010120 3.4034  0.308
-    ## RDA3      1 0.004418 1.4858  0.791
-    ## RDA4      1 0.002593 0.8722  0.917
+    ## RDA1      1 0.014721 4.9507  0.196
+    ## RDA2      1 0.010120 3.4034  0.327
+    ## RDA3      1 0.004418 1.4858  0.816
+    ## RDA4      1 0.002593 0.8722  0.914
     ## RDA5      1 0.000606 0.2038  1.000
-    ## RDA6      1 0.000213 0.0715  0.999
+    ## RDA6      1 0.000213 0.0715  1.000
     ## Residual 25 0.074337
 
 Find the most parsimonious model...
