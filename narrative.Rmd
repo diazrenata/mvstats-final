@@ -2,7 +2,7 @@
 title: "Multivar stats final project"
 author: "Renata Diaz"
 date: "11/23/2018"
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -18,7 +18,7 @@ library(ca)
 
 * Download rodent and plant data from the Portal Project repo:
 
-```{r download data, eval = T}
+```{r download data, eval = F}
 source('R/store_rodent_data.R')
 source('R/store_plant_data.R')
 
@@ -39,7 +39,7 @@ Adjust data to compensate for irregular trapping and census effort.
 * Standardized according to sampling effort (per census period)
 * Summed across all months in each calendar year
 
-```{r adjust data, eval = T}
+```{r adjust data, eval = F}
 rodents <- read.csv('data/rodents-raw.csv', stringsAsFactors = F)
 winter_plants <-read.csv('data/winter-plants-raw.csv', stringsAsFactors = F)
 summer_plants <- read.csv('data/summer-plants-raw.csv', stringsAsFactors = F)
@@ -89,17 +89,8 @@ summer_pcoa <- cmdscale(summer_dist_mat, k = nrow(summer_plants_wis) - 1, eig = 
   plot(eigenvalues)
   lines(lowess(eigenvalues))
   
-  
-
-#ordiplot(scores(summer_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Summer plant PCoA")
-## species scores not available
-#abline(h = 0, lty = 3)
-#abline(v = 0, lty = 3)
-
-# Add species
 
 species_pc <- wascores(summer_pcoa$points[, 1:3], summer_plants_wis)
-#text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
   
 ```
 
@@ -157,17 +148,8 @@ winter_pcoa <- cmdscale(winter_dist_mat, k = nrow(winter_plants_wis) - 1, eig = 
 # Scree plot:
   plot(eigenvalues)
   lines(lowess(eigenvalues))
-  
-
-#ordiplot(scores(winter_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Winter plant PCoA")
-## species scores not available
-#abline(h = 0, lty = 3)
-#abline(v = 0, lty = 3)
-
-# Add species
 
 species_pc <- wascores(winter_pcoa$points[, 1:3], winter_plants_wis)
-# text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
 
 ```
 
@@ -209,9 +191,9 @@ colnames(summer_scores) <- c('speciescode', 'saxis1',
                              'saxis2', 'saxis3')
 
 # Compile species info & load
-
-source('R/compile_species_info.R')
-compile_species_info()
+# 
+# source('R/compile_species_info.R')
+# compile_species_info()
 
 plant_info <- read.csv('data/compiled_plant_species_data.csv', stringsAsFactors = F)
 
@@ -251,19 +233,7 @@ this_regression <- get_seed_mass_regression(winter_scores, i + 1)
   print(this_regression)
 }
 
-# Insomuch as we have it, seed size data doesn't predict axis scores
-
-# for ordiplots, add colors to scores
-
-community_colors <- summer_scores %>%
-  select(community) %>%
-  distinct()
-
-community_colors$colour <- viridis::plasma(n = 7)
-
-winter_scores <- left_join(winter_scores, community_colors, by = 'community')
-
-summer_scores <- left_join(summer_scores, community_colors, by = 'community')
+# Seed size predicts the score for summer axis 1, but not the other axes. 
 
 par(mfrow = c(1,1))
 
@@ -276,10 +246,7 @@ abline(v = 0, lty = 3)
 
 # Add species
 
- text(summer_scores[, c(2, 3)], summer_scores$speciescode, cex = 0.7, col = summer_scores$colour)
- legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
-        cex = 0.5)
-
+ text(summer_scores[, c(2, 3)], summer_scores$speciescode, cex = 0.7)
  
 
 
@@ -290,9 +257,7 @@ abline(v = 0, lty = 3)
 
 # Add species
 
- text(winter_scores[, c(2, 3)], winter_scores$speciescode, cex = 0.7, col = winter_scores$colour)
- legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
-        cex = 0.5)
+ text(winter_scores[, c(2, 3)], winter_scores$speciescode, cex = 0.7)
 
  
  ### Axes through time
@@ -349,12 +314,15 @@ rodents <- filter(rodents, year %in% pred_vals$year,
                   treatment == 'control') %>%
   select(-year, -treatment)
 
-pred_vals_noy <- select(pred_vals, -year)
-pred_vals_y <- select(pred_vals, year)
-
 rodents_hel <- decostand(rodents, 'hellinger')
 
-rodents_prda <- rda(rodents_hel ~ . + Condition(pred_vals_y$year), pred_vals_noy)
+rodents_prda <- rda(rodents_hel ~ WinterPCoAxis_1 + 
+                     WinterPCoAxis_2 + 
+                      WinterPCoAxis_3 +
+                     SummerPCoAxis_1 + 
+                     SummerPCoAxis_2 + 
+                     SummerPCoAxis_3 +
+                    Condition(year), pred_vals)
 
 R2 <- RsquareAdj(rodents_prda)$r.squared
 R2adj <- RsquareAdj(rodents_prda)$adj.r.squared
@@ -373,13 +341,13 @@ Find the most parsimonious model...
 
 ```{r reduce vars part, echo = T}
 
-set.seed(11)
+set.seed(1)
 step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formula(rodents_prda), 
                            R2scope = F, direction = "forward", pstep = 1000)
 
-# Most parsimonious is Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 
+# Most parsimonious is Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      SummerPCoAxis_2
 
-rod_prda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2  + Condition(pred_vals_y$year), pred_vals_noy)
+rod_prda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2 + Condition(year), pred_vals)
 
 pR2p <- RsquareAdj(rod_prda_pars)$r.squared
 pR2adjp <- RsquareAdj(rod_prda_pars)$adj.r.squared
@@ -391,6 +359,7 @@ pR2adjp
 anova(rod_prda_pars, step = 1000)
 anova(rod_prda_pars, by = "axis", step = 1000)
 
+# ONLY FIRST TWO AXES ARE SIGNIFICANT
 
 ```
 
@@ -398,13 +367,13 @@ anova(rod_prda_pars, by = "axis", step = 1000)
 
 ```{r  partial variance partitioning, echo = T}
 
-rod_ppart <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~  WinterPCoAxis_2, ~ pred_vals_y$year, data = pred_vals_noy)
+rod_ppart <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~  WinterPCoAxis_3, ~ year, data = pred_vals)
 rod_ppart
 
 plot(rod_ppart, digits = 2)
 ```
 
-WinterPCoAxis_1 combined with year has the largest chunk (.34); on its own, WinterPCoAxis_1 explains an additional .1
+WinterPCoAxis_1 combined with year has the largest chunk (.369); on its own, WinterPCoAxis_1 explains an additional .1
 
 ### Years - rodents comparison
 
@@ -447,13 +416,13 @@ Find the most parsimonious model...
 
 ```{r reduce vars regular, echo = T}
 
-set.seed(11)
+set.seed(1)
 step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formula(rodents_rda), 
                            R2scope = F, direction = "forward", pstep = 1000)
 
-# Most parsimonious is rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +  SummerPCoAxis_2 
+# Most parsimonious is rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +  year 
 
-rod_rda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2, pred_vals)
+rod_rda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + year, pred_vals)
 
 R2p <- RsquareAdj(rod_rda_pars)$r.squared
 R2adjp <- RsquareAdj(rod_rda_pars)$adj.r.squared
@@ -465,14 +434,16 @@ R2adjp
 anova(rod_rda_pars, step = 1000)
 anova(rod_rda_pars, by = "axis", step = 1000)
 
-
+# First 3 axes are significant
 ```
 
 
 ```{r  regular variance partitioning, echo = T}
 
-rod_part <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~ WinterPCoAxis_3, ~  WinterPCoAxis_2, ~ SummerPCoAxis_2, data = pred_vals)
+rod_part <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~ WinterPCoAxis_3, ~  WinterPCoAxis_2, ~year, data = pred_vals)
 rod_part
 
 plot(rod_part, digits = 2)
 ```
+
+# Winter PCoA 1 still captures most of the variation. 

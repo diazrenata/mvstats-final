@@ -1,0 +1,79 @@
+---
+output: word_document
+---
+## Introduction
+
+The Portal Project is a long-term research project that has so far generated 40 years of regularly-collected data on rodents, plants, and weather in the Chiricahuan Desert near Portal, AZ. The composition of the plant and rodent communities, their drivers, and the relationships between them have long been topics of interest at Portal. However, the high-dimensionality of both the plant and rodent datasets has made it challenging to identify general signals of change, let alone relationships between plants and rodents, at the community rather than species level.
+
+Recently, Christensen et al (2018) applied Latent Dirilect Allocation **SP** - a technique adapted from text analysis - define community "types" in the rodent community, and used a change-point model to identify moments of rapid change in rodent community composition. Intriguingly, while three of the four changepoints identified in Christensen et al 2018 can be convincingly attributed to extreme weather events, the fourth cannot. This change-point occurs in the early to mid 1990s, and seems to extend over a longer period of time. It is natural to wonder whether the plant community contributed to this slower change.
+
+Given Christensen et al's significant progress towards distilling the rodent community into a relatively-interpretable form, it is an opportune time to attempt to simplify the plant community data. It will especially interesting to explore whether plant community dynamics predict changes in the rodent community, especially in the early 1990s.
+
+## Methods
+
+### The Portal data
+
+The Portal Project consists of 20 plots, which have had various experimental treatments over the years. This project focuses on control plots, which are accessible to all rodent species. For a more complete description of Portal protocols, see the living data paper recently released by Ernest et al (2018: preprint). Briefly, we census the rodent community approximately monthly at the new moon. Sherman traps, baited with millet, are set at 49 stakes in each plot. Captured individuals are identified to species, tagged, measured and weighed, and released. We census the plant community twice a year, in the spring and late summer, because Portal has strongly differentiated winter and summer plant communities corresponding to its two wet seasons. During a census, all plants within .5x.5m quadrats (20/plot) are identified and counted.
+
+All Portal data is freely accessible via the living data paper () or a GitHub repository: . In this study, I use the portalr R package to access summaries of the Portal data. The package is available on CRAN; alternatively, the scripts for this project will run without portalr as long the correct data files are in the data folder.
+
+For this project, I used the entire rodent timeseries, standardized according to sample effort to account for incompletely-sampled census periods. Because plant censuses are annual and not monthly, I used yearly sums of rodent abundances. I used all available plant censuses, again standardized according to sample effort. I restricted the analysis to the two annual plant communities (primarily excluding some grasses and woody species better sampled at larger scales). There are 27 years with complete data: rodent censuses and a summer and winter plant census.
+
+### Analysis: Distilling the plant communities
+
+There are X species in the combined winter and plant datasets. These data do not lend themselves to current implementations of LDA for ecological data, so I used a Principle Coordinates Analysis to reduce the dimensionality of the plant communities (deconstand in vegan). The communities are known to be largely distinct, so I ran PCoA's on summer and winter data separately. Prior to running each PCoA, I removed species that did not occur at all in the season in question. I used a Wisconsin transformation (function in the vegan package) on the raw abundance values, and then used a Bray-Curtis dissimilarity matrix (function) for the PCoA.
+
+For both communities, scree plots showed inflection points at around three axes, and three axes captured a substantial proportion of variation (%s.) Although we have relatively little information about the natural history of particular plant species, I explored two known features of the plant community: a general decline in larger-seeded species compared to small-seeded species (Valone 2017), and the rapid establishment of the invasive erio aber in the 1990s (Allington). I used weighted scores and regressions () to test whether seed mass predicted species' scores on PC axes, and I checked scores for erio aber on all axes. Because the first axis for the winter community was consistently important, I specifically explored its most strongly contributing species, plotted its trajectory over time, and plotted its relationship to the rodent species.
+
+### Analysis: Relating plant and rodent communities
+
+I used redundancy analysis to relate the first three axes of each plant community's PCoA, as well as year, to the rodent community. Prior to analysis, I standardized rodent abundances using a Hellinger transformation. Because this is a timeseries, and year may capture a considerable portion of variation, I compared the results from a partial RDA conditioned on year and an un-conditioned RDA including year as a potential predictor. I selected the most parsimonious RDAs stepwise using ordistep in vegan (). I used permutation tests (anova.cca in vegan) to test the significance of the global RDAs and individual axes. For both RDAs, I used variance partitioning (function) to see how much variation each significant constraint captured.
+
+## Results
+
+### Exploring the PCoA axes
+Interestingly, seed mass did not predict a species' score for any PC axis except for axis 1 in the summer community (report p-values) . Erio aber [whatever that does].
+
+### Partial redundancy analysis
+LIST OR TABLE
+Most parsimonious model: 
+Significant axes from anova:
+
+### Redundancy analysis:
+LIST OR TABLE
+Most parsimonous model:
+Significant axes from anova:
+
+### Variance partitioning
+Reflecting prda: PLOT
+Reflecting rda: PLOT
+
+Where do rodent species fall on winter axis 1? ordiplot PLOT
+
+Which plants are on winter axis 1? LIST
+
+## Discussion
+
+* winter axis 1 is consistently important, but seems to correspond strongly to year 
+
+* not seed size!
+
+* corresponds to DS decline and period of change in the 1990s.
+
+* does this also happen on exclosures? 
+
+* diet analysis might help us understand how rodents // these particular plants
+
+* wd be nice to LDA - either with some filtering algorithm. but mb need more samples?
+
+## References
+* lda paper
+* Allington
+* Valone
+* living data paper
+* portalr
+* vegan
+* ca
+* dplyr
+* R
+* metabarcoding paper

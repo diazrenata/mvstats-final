@@ -7,7 +7,7 @@
 
 library(dplyr)
 store_plant_data <- function(){
-primary_tables <- portalr::load_data(path = 'repo')
+primary_tables <- portalr::load_data(path = '/Users/renatadiaz/Documents/GitHub/weecology')
 
 plot_treatments_summer <- primary_tables[[5]] %>%
   dplyr::filter(month %in% 4:9) %>%
@@ -20,7 +20,7 @@ plot_treatments_winter <- primary_tables[[5]] %>%
   dplyr::distinct()
 
 
-all_plants <- portalr::plant_abundance(path = 'repo', level = 'Plot', type = 'All', plots = 'Longterm', unknowns = F, 
+all_plants <- portalr::plant_abundance(path = '/Users/renatadiaz/Documents/GitHub/weecology', level = 'Plot', type = 'Annuals', plots = 'Longterm', unknowns = F, 
                           correct_sp = T, shape = 'flat', na_drop = T, effort = T)
 
 summer <- all_plants %>% 
