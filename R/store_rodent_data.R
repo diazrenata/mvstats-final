@@ -1,12 +1,6 @@
-#' @importFrom magrittr "%>%"
-#' @title store portal plant dataframes
-#'
-#' Import Portal rodent data using portalr functions.
-#'
-#' @export
-
 library(dplyr)
 store_rodent_data <- function(){
+  # Import rodent data tables
   primary_tables <- portalr::load_data(path = 'repo')
   
   rodents <- primary_tables[[1]]
@@ -15,11 +9,14 @@ store_rodent_data <- function(){
   newmoons <- primary_tables[[4]]
   plots <- primary_tables[[5]]
   
+  # Get plot treatments for each year (treatments have changed over time)
   plots_history <- left_join(plots, trapping, 
                      by = c('year', 'month', 'plot')) 
   plots_history <- plots_history %>%
     select(year, month, plot, treatment, period, sampled)
   
+  # Filter to granivores identified to species
+  # Combine rodent data & plot treatment tables
   focal_spp <- species %>%
     filter(granivore == 1, unidentified == 0) %>%
     select(species)

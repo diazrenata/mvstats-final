@@ -19,19 +19,19 @@ All Portal data is freely accessible via the living data paper () or a GitHub re
 
 For this project, I used the entire rodent timeseries, standardized according to sample effort to account for incompletely-sampled census periods. Because plant censuses are annual and not monthly, I used yearly sums of rodent abundances. I used all available plant censuses, again standardized according to sample effort. I restricted the analysis to the two annual plant communities (primarily excluding some grasses and woody species better sampled at larger scales). There are 27 years with complete data: rodent censuses and a summer and winter plant census.
 
-### Analysis: Distilling the plant communities
+### Analysis: Distilling the plant communities (PCoA)
 
 There are X species in the combined winter and plant datasets. These data do not lend themselves to current implementations of LDA for ecological data, so I used a Principle Coordinates Analysis to reduce the dimensionality of the plant communities (deconstand in vegan). The communities are known to be largely distinct, so I ran PCoA's on summer and winter data separately. Prior to running each PCoA, I removed species that did not occur at all in the season in question. I used a Wisconsin transformation (function in the vegan package) on the raw abundance values, and then used a Bray-Curtis dissimilarity matrix (function) for the PCoA.
 
-For both communities, scree plots showed inflection points at around three axes, and three axes captured a substantial proportion of variation (%s.) Although we have relatively little information about the natural history of particular plant species, I explored two known features of the plant community: a general decline in larger-seeded species compared to small-seeded species (Valone 2017), and the rapid establishment of the invasive erio aber in the 1990s (Allington). I used weighted scores and regressions () to test whether seed mass predicted species' scores on PC axes, and I checked scores for erio aber on all axes. Because the first axis for the winter community was consistently important, I specifically explored its most strongly contributing species, plotted its trajectory over time, and plotted its relationship to the rodent species.
+For both communities, scree plots showed inflection points at approximately three axes, and three axes captured a substantial proportion of variation (%s.) Although we have relatively little information about the natural history of particular plant species, I explored two known features of the plant community: a general decline in large-seeded species compared to small-seeded species (Valone 2017), and the rapid establishment of the invasive erio aber in the 1990s (Allington). I used weighted scores and regressions () to test whether seed mass predicted species' scores on PC axes, and I checked scores for erio aber on all axes. Because the first axis for the winter community was consistently important, I specifically explored its most strongly contributing species, plotted its trajectory over time, and plotted its relationship to the rodent species.
 
-### Analysis: Relating plant and rodent communities
+### Analysis: Relating plant and rodent communities (RDA)
 
 I used redundancy analysis to relate the first three axes of each plant community's PCoA, as well as year, to the rodent community. Prior to analysis, I standardized rodent abundances using a Hellinger transformation. Because this is a timeseries, and year may capture a considerable portion of variation, I compared the results from a partial RDA conditioned on year and an un-conditioned RDA including year as a potential predictor. I selected the most parsimonious RDAs stepwise using ordistep in vegan (). I used permutation tests (anova.cca in vegan) to test the significance of the global RDAs and individual axes. For both RDAs, I used variance partitioning (function) to see how much variation each significant constraint captured.
 
 ## Results
 
-### Exploring the PCoA axes
+### PCoA
 Interestingly, seed mass did not predict a species' score for any PC axis except for axis 1 in the summer community (report p-values) . Erio aber [whatever that does].
 
 ### Partial redundancy analysis

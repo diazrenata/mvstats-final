@@ -1,8 +1,8 @@
 ---
-title: "Multivar stats final project"
+title: "Multivar stats final project - script"
 author: "Renata Diaz"
 date: "11/23/2018"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -10,13 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(vegan)
 library(ca)
-  
+
 ```
 
 
-## Get data
+## Download & process data
 
-* Download rodent and plant data from the Portal Project repo:
+Download rodent and plant data from the Portal Project repo - note that functions rely on the portalr package, which is available on CRAN. I put all the raw data files in the data folder, so you don't need to run this step. 
 
 ```{r download data, eval = F}
 source('R/store_rodent_data.R')
@@ -27,10 +27,11 @@ store_plant_data()
 store_plant_species_info()
 ```
 
-Adjust data to compensate for irregular trapping and census effort.
+
 
 ### Plant data
 * Extracted summer & winter plant censuses for all years 
+* Restricted to winter and summer annuals
 * Standardized plant abundances according to sampling effort
 * Kept seasons separate
 
