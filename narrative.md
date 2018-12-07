@@ -1,38 +1,26 @@
-Multivar stats final project
+Multivar stats final project - script
 ================
 Renata Diaz
 11/23/2018
 
-Get data
---------
+Download & process data
+-----------------------
 
--   Download rodent and plant data from the Portal Project repo:
+Download rodent and plant data from the Portal Project repo - note that functions rely on the portalr package, which is available on CRAN. I put all the raw data files in the data folder, so you don't need to run this step.
 
 ``` r
 source('R/store_rodent_data.R')
 source('R/store_plant_data.R')
 
 store_rodent_data()
-```
-
-    ## Loading in data version 1.66.0
-
-``` r
 store_plant_data()
-```
-
-    ## Loading in data version 1.66.0
-    ## Loading in data version 1.66.0
-
-``` r
 store_plant_species_info()
 ```
-
-Adjust data to compensate for irregular trapping and census effort.
 
 ### Plant data
 
 -   Extracted summer & winter plant censuses for all years
+-   Restricted to winter and summer annuals
 -   Standardized plant abundances according to sampling effort
 -   Kept seasons separate
 
@@ -58,155 +46,162 @@ rm(list=ls())
 PCoA
 ----
 
--   Transformed raw abundance values using the Wisconsin transformation, and then created a Bray-Curtis dissimilarity matrix for each community.
--   Ran PCoA on the dissimilarity matrices, separately for each community.
+-   Transform raw abundance values using the Wisconsin transformation, and then created a Bray-Curtis dissimilarity matrix for each community.
+-   Run PCoA on the dissimilarity matrices, separately for each community.
 
 ### Summer PCoA
 
 ``` r
+# Load plant data
+
 all_plants <- read.csv('data/plants-adjusted.csv',
-                          stringsAsFactors = F)
+                       stringsAsFactors = F)
+
+# Filter to summer plants on control plots
 summer_plants <- all_plants %>%
   filter(season == 'summer', treatment == 'control') %>%
   select(-season, -treatment)
 
+# Remove species not present in the summer
 summer_plants <- summer_plants[ , which(colSums(summer_plants) > 0)]
 
+# Wisconsin transform
 summer_plants_wis <- vegan::wisconsin(summer_plants[,2:ncol(summer_plants)])
 
+# Bray-Curtis dissimilarity matrix
 summer_dist_mat <- vegdist(summer_plants_wis, 'bray')
-  
+
+# PCoA
 summer_pcoa <- cmdscale(summer_dist_mat, k = nrow(summer_plants_wis) - 1, eig = T)
 ```
 
     ## Warning in cmdscale(summer_dist_mat, k = nrow(summer_plants_wis) - 1, eig =
-    ## T): only 29 of the first 33 eigenvalues are > 0
+    ## T): only 26 of the first 31 eigenvalues are > 0
 
 ``` r
-# Proportion of variance table 
-  eigenvalues <- summer_pcoa$eig[1:nrow(summer_plants_wis)-1]
-  propVar <- eigenvalues/sum(eigenvalues)
-  cumVar <- cumsum(propVar)
-  Summer_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
-  
-  Summer_PCoA_Table[1:15,]
+# Generate proportion of variance table 
+eigenvalues <- summer_pcoa$eig[1:nrow(summer_plants_wis)-1]
+propVar <- eigenvalues/sum(eigenvalues)
+cumVar <- cumsum(propVar)
+Summer_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
+
+
+Summer_PCoA_Table[1:15,]
 ```
 
     ##       eigenvalues    propVar    cumVar
-    ##  [1,]   2.0448708 0.17950879 0.1795088
-    ##  [2,]   1.4511379 0.12738800 0.3068968
-    ##  [3,]   0.8779779 0.07707320 0.3839700
-    ##  [4,]   0.8292255 0.07279348 0.4567635
-    ##  [5,]   0.7310681 0.06417675 0.5209402
-    ##  [6,]   0.5734561 0.05034079 0.5712810
-    ##  [7,]   0.5363604 0.04708435 0.6183654
-    ##  [8,]   0.4492451 0.03943694 0.6578023
-    ##  [9,]   0.4385589 0.03849885 0.6963012
-    ## [10,]   0.4055310 0.03559950 0.7319007
-    ## [11,]   0.3566596 0.03130933 0.7632100
-    ## [12,]   0.3444544 0.03023789 0.7934479
-    ## [13,]   0.3235685 0.02840443 0.8218523
-    ## [14,]   0.2619292 0.02299343 0.8448457
-    ## [15,]   0.2480443 0.02177455 0.8666203
+    ##  [1,]   2.0508707 0.19608563 0.1960856
+    ##  [2,]   1.5954875 0.15254602 0.3486316
+    ##  [3,]   1.1032454 0.10548231 0.4541140
+    ##  [4,]   0.8942843 0.08550334 0.5396173
+    ##  [5,]   0.7203322 0.06887162 0.6084889
+    ##  [6,]   0.6103352 0.05835471 0.6668436
+    ##  [7,]   0.5403830 0.05166652 0.7185101
+    ##  [8,]   0.4545490 0.04345985 0.7619700
+    ##  [9,]   0.3675808 0.03514474 0.7971147
+    ## [10,]   0.3361137 0.03213614 0.8292509
+    ## [11,]   0.2948953 0.02819521 0.8574461
+    ## [12,]   0.2866688 0.02740866 0.8848547
+    ## [13,]   0.2767467 0.02646001 0.9113147
+    ## [14,]   0.2180342 0.02084645 0.9321612
+    ## [15,]   0.1798866 0.01719913 0.9493603
 
 ``` r
 # Scree plot:
-  plot(eigenvalues)
-  lines(lowess(eigenvalues))
+plot(eigenvalues)
+lines(lowess(eigenvalues))
 ```
 
 ![](narrative_files/figure-markdown_github/summer%20pcoa-1.png)
 
 ``` r
-#ordiplot(scores(summer_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Summer plant PCoA")
-## species scores not available
-#abline(h = 0, lty = 3)
-#abline(v = 0, lty = 3)
-
-# Add species
-
+# Calculate and save species scores (to look at later)
 species_pc <- wascores(summer_pcoa$points[, 1:3], summer_plants_wis)
-#text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
+write.csv(species_pc, 'models/summer_species_scores.csv', row.names = T)
 ```
 
-There seems to be an inflection point in the scree plot around axis 3.
+There seems to be an inflection point in the scree plot around axis 3. The first three axes describe a cumulative 45% of variation.
 
 Moving forward, keeping the first 3 axes as predictor variables for the rodent community.
 
 ### Winter PCoA
 
 ``` r
+# Get winter control plants from whole plant dataset
 winter_plants <- all_plants %>%
   filter(season == 'winter', treatment == 'control') %>%
   select(-season, -treatment)
 
-
+# Remove species not present in the winter
 winter_plants <- winter_plants[ , which(colSums(winter_plants) > 0)]
 
-
+# Wisconsin transform
 winter_plants_wis <- vegan::wisconsin(winter_plants[,2:ncol(winter_plants)])
 
-
+# Bray-Curtis matrix
 winter_dist_mat <- vegdist(winter_plants_wis, 'bray')
-  
+
+# PCoA
 winter_pcoa <- cmdscale(winter_dist_mat, k = nrow(winter_plants_wis) - 1, eig = T)
 ```
 
     ## Warning in cmdscale(winter_dist_mat, k = nrow(winter_plants_wis) - 1, eig =
-    ## T): only 32 of the first 34 eigenvalues are > 0
+    ## T): only 24 of the first 30 eigenvalues are > 0
 
 ``` r
 # Proportion of variance table 
-  eigenvalues <- winter_pcoa$eig[1:nrow(winter_plants_wis)-1]
-  propVar <- eigenvalues/sum(eigenvalues)
-  cumVar <- cumsum(propVar)
-  winter_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
-  
-  winter_PCoA_Table[1:15,]
+eigenvalues <- winter_pcoa$eig[1:nrow(winter_plants_wis)-1]
+propVar <- eigenvalues/sum(eigenvalues)
+cumVar <- cumsum(propVar)
+winter_PCoA_Table <- cbind(eigenvalues, propVar, cumVar)
+
+winter_PCoA_Table[1:15,]
 ```
 
     ##       eigenvalues    propVar    cumVar
-    ##  [1,]   2.1552658 0.17530090 0.1753009
-    ##  [2,]   1.5097990 0.12280115 0.2981021
-    ##  [3,]   1.3006726 0.10579163 0.4038937
-    ##  [4,]   0.8819023 0.07173049 0.4756242
-    ##  [5,]   0.7334878 0.05965903 0.5352832
-    ##  [6,]   0.6588629 0.05358933 0.5888725
-    ##  [7,]   0.5772049 0.04694759 0.6358201
-    ##  [8,]   0.5610690 0.04563517 0.6814553
-    ##  [9,]   0.4313966 0.03508812 0.7165434
-    ## [10,]   0.3932881 0.03198852 0.7485319
-    ## [11,]   0.3706911 0.03015056 0.7786825
-    ## [12,]   0.3313629 0.02695176 0.8056343
-    ## [13,]   0.2935723 0.02387802 0.8295123
-    ## [14,]   0.2930938 0.02383910 0.8533514
-    ## [15,]   0.2405956 0.01956911 0.8729205
+    ##  [1,]   2.4791232 0.22814312 0.2281431
+    ##  [2,]   1.2204905 0.11231653 0.3404597
+    ##  [3,]   1.1211349 0.10317326 0.4436329
+    ##  [4,]   0.9427954 0.08676144 0.5303944
+    ##  [5,]   0.6974427 0.06418268 0.5945770
+    ##  [6,]   0.6037170 0.05555750 0.6501345
+    ##  [7,]   0.5479375 0.05042435 0.7005589
+    ##  [8,]   0.4965611 0.04569640 0.7462553
+    ##  [9,]   0.4060608 0.03736804 0.7836233
+    ## [10,]   0.3751394 0.03452248 0.8181458
+    ## [11,]   0.3636433 0.03346454 0.8516103
+    ## [12,]   0.3331781 0.03066095 0.8822713
+    ## [13,]   0.2674315 0.02461058 0.9068819
+    ## [14,]   0.2230801 0.02052911 0.9274110
+    ## [15,]   0.1818489 0.01673478 0.9441458
 
 ``` r
 # Scree plot:
-  plot(eigenvalues)
-  lines(lowess(eigenvalues))
+plot(eigenvalues)
+lines(lowess(eigenvalues))
 ```
 
 ![](narrative_files/figure-markdown_github/winter%20pcoa-1.png)
 
 ``` r
-#ordiplot(scores(winter_pcoa)[, c(1, 2)], type = "n", cex = 1, main = "Winter plant PCoA")
-## species scores not available
-#abline(h = 0, lty = 3)
-#abline(v = 0, lty = 3)
-
-# Add species
-
+# Calculate and save winter species scores
 species_pc <- wascores(winter_pcoa$points[, 1:3], winter_plants_wis)
-# text(species_pc, rownames(species_pc), cex = 0.7, col = "red")
+
+write.csv(species_pc, 'models/winter_species_scores.csv', row.names = T)
+
+# Save PCoA tables for paper
+
+write.csv(as.data.frame(Summer_PCoA_Table), 'models/summer_table.csv')
+write.csv(as.data.frame(winter_PCoA_Table), 'models/winter_table.csv')
 ```
 
-There seems to be an inflection point in the scree plot around axis 2 or 3. Since stopping at 2 would only capture 35% of variation, going to go for 3.
+There seems to be an inflection point in the scree plot around axis 2 or 3. Three axes describe a cumulative 44% of variation, so moving forward with axes.
 
 ### Explore the PCoA axes
 
 ``` r
+# Load all axes
+
 summer_axes <- read.csv('models/summer_pcoa_axes.csv', stringsAsFactors = F)
 winter_axes <- read.csv('models/winter_pcoa_axes.csv', stringsAsFactors = F)
 summer_scores <- read.csv('models/summer_species_scores.csv',
@@ -219,10 +214,11 @@ colnames(winter_scores) <- c('speciescode', 'waxis1',
 colnames(summer_scores) <- c('speciescode', 'saxis1', 
                              'saxis2', 'saxis3')
 
-# Compile species info & load
+# Compile species seed mass info & load
 
-source('R/compile_species_info.R')
-compile_species_info()
+# # Do not need to run - file already exists
+# source('R/compile_species_info.R') 
+# compile_species_info()
 
 plant_info <- read.csv('data/compiled_plant_species_data.csv', stringsAsFactors = F)
 
@@ -231,180 +227,79 @@ plant_info <- select(plant_info, speciescode, community, seed_mass)
 winter_scores <- left_join(winter_scores, plant_info, by = 'speciescode')
 
 summer_scores <- left_join(summer_scores, plant_info, by = 'speciescode')
-
-## Does seed mass predict scores
-
-par(mfrow = c(2, 3))
-plot(summer_scores$seed_mass, summer_scores$saxis1)
-abline(lm(summer_scores$saxis1~summer_scores$seed_mass), col="red")
-plot(summer_scores$seed_mass, summer_scores$saxis2)
-abline(lm(summer_scores$saxis2~summer_scores$seed_mass), col="red")
-plot(summer_scores$seed_mass, summer_scores$saxis3)
-abline(lm(summer_scores$saxis3~summer_scores$seed_mass), col="red")
-
-plot(winter_scores$seed_mass, winter_scores$waxis1)
-abline(lm(winter_scores$waxis1~winter_scores$seed_mass), col="red")
-plot(winter_scores$seed_mass, winter_scores$waxis2)
-abline(lm(winter_scores$waxis2~winter_scores$seed_mass), col="red")
-plot(winter_scores$seed_mass, winter_scores$waxis3)
-abline(lm(winter_scores$waxis3~winter_scores$seed_mass), col="red")
 ```
 
-![](narrative_files/figure-markdown_github/explore%20axes-1.png)
+### Does seed mass predict species scores?
 
 ``` r
+# Source function to run a regression of species score against seed mass
 source('R/get_seed_mass_regression.R')
 
+# Get p-values for all regressions
+regression_ps <- vector(length = 6)
+
 for(i in 1:3) {
-this_regression <- get_seed_mass_regression(summer_scores, i + 1)
-  print(this_regression)
+  this_regression <- get_seed_mass_regression(summer_scores, i + 1)
+  regression_ps[i] <-  this_regression[[1]][2,4]
 }
-```
 
-    ## [[1]]
-    ##                Estimate Std. Error   t value  Pr(>|t|)
-    ## (Intercept) -0.12942385 0.11106864 -1.165260 0.2820807
-    ## sizes        0.09469495 0.06142757  1.541571 0.1670801
-    ## 
-    ## [[2]]
-    ## [1] 0.2534481
-    ## 
-    ## [[1]]
-    ##                Estimate Std. Error   t value  Pr(>|t|)
-    ## (Intercept)  0.09181182 0.08669055  1.059075 0.3247363
-    ## sizes       -0.08398597 0.04794504 -1.751714 0.1232844
-    ## 
-    ## [[2]]
-    ## [1] 0.3047624
-    ## 
-    ## [[1]]
-    ##                Estimate Std. Error   t value  Pr(>|t|)
-    ## (Intercept) -0.07315974 0.07033771 -1.040121 0.3328700
-    ## sizes        0.04211157 0.03890094  1.082533 0.3148903
-    ## 
-    ## [[2]]
-    ## [1] 0.1434038
 
-``` r
 for(i in 1:3) {
-this_regression <- get_seed_mass_regression(winter_scores, i + 1)
-  print(this_regression)
+  this_regression <- get_seed_mass_regression(winter_scores, i + 1)
+  regression_ps[i+3] <-  this_regression[[1]][2,4]
 }
 ```
 
-    ## [[1]]
-    ##               Estimate Std. Error   t value     Pr(>|t|)
-    ## (Intercept) -0.1930458 0.03529711 -5.469167 9.785684e-06
-    ## sizes        0.0238644 0.01651142  1.445327 1.603122e-01
-    ## 
-    ## [[2]]
-    ## [1] 0.07436978
-    ## 
-    ## [[1]]
-    ##                Estimate Std. Error    t value  Pr(>|t|)
-    ## (Intercept) -0.03510730 0.03590929 -0.9776662 0.3372492
-    ## sizes        0.02508994 0.01679779  1.4936456 0.1473059
-    ## 
-    ## [[2]]
-    ## [1] 0.07902585
-    ## 
-    ## [[1]]
-    ##                Estimate Std. Error    t value  Pr(>|t|)
-    ## (Intercept)  0.02651648 0.03483549  0.7611916 0.4533918
-    ## sizes       -0.01956670 0.01629548 -1.2007438 0.2406761
-    ## 
-    ## [[2]]
-    ## [1] 0.05253979
+![](narrative_files/figure-markdown_github/plot%20seed%20size-1.png)
+
+Seed size predicts the score for summer axis 1, but not the other axes.
+
+### What is *E. ciculatum*'s score on each axis?
 
 ``` r
-# Insomuch as we have it, seed size data doesn't predict axis scores
+summer_scores_ranks <- summer_scores %>%
+  select(speciescode, saxis1, saxis2, saxis3) %>%
+  mutate(abs_score = abs(saxis1)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis1_rank = row_number()) %>%
+  mutate(abs_score = abs(saxis2)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis2_rank = row_number()) %>%
+  mutate(abs_score = abs(saxis3)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis3_rank = row_number()) %>%
+  select(-abs_score)
+winter_scores_ranks <- winter_scores %>%
+  select(speciescode, waxis1, waxis2, waxis3) %>%
+  mutate(abs_score = abs(waxis1)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis1_rank = row_number()) %>%
+  mutate(abs_score = abs(waxis2)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis2_rank = row_number()) %>%
+  mutate(abs_score = abs(waxis3)) %>%
+  arrange(desc(abs_score)) %>%
+  mutate(axis3_rank = row_number()) %>%
+  select(-abs_score)
 
-# for ordiplots, add colors to scores
-
-community_colors <- summer_scores %>%
-  select(community) %>%
-  distinct()
-
-community_colors$colour <- viridis::plasma(n = 7)
-
-winter_scores <- left_join(winter_scores, community_colors, by = 'community')
-
-summer_scores <- left_join(summer_scores, community_colors, by = 'community')
-
-par(mfrow = c(1,1))
-
-## Ordiplots
-
-ordiplot(summer_scores[, c(2, 3)], type = "n", cex = 1, main = "Summer plant PCoA")
+filter(summer_scores_ranks, speciescode == 'erod.cicu')
 ```
 
-    ## species scores not available
+    ##   speciescode    saxis1     saxis2     saxis3 axis1_rank axis2_rank
+    ## 1   erod.cicu 0.2403355 0.01631055 0.04430535         16         34
+    ##   axis3_rank
+    ## 1         34
 
 ``` r
-abline(h = 0, lty = 3)
-abline(v = 0, lty = 3)
-
-# Add species
-
- text(summer_scores[, c(2, 3)], summer_scores$speciescode, cex = 0.7, col = summer_scores$colour)
- legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
-        cex = 0.5)
+filter(winter_scores_ranks, speciescode == 'erod.cicu')
 ```
 
-![](narrative_files/figure-markdown_github/explore%20axes-2.png)
+    ##   speciescode    waxis1     waxis2     waxis3 axis1_rank axis2_rank
+    ## 1   erod.cicu 0.2853572 0.03895151 -0.3226492         17         42
+    ##   axis3_rank
+    ## 1          2
 
-``` r
-ordiplot(winter_scores[, c(2, 3)], type = "n", cex = 1, main = "Winter plant PCoA")
-```
-
-    ## species scores not available
-
-``` r
-abline(h = 0, lty = 3)
-abline(v = 0, lty = 3)
-
-# Add species
-
- text(winter_scores[, c(2, 3)], winter_scores$speciescode, cex = 0.7, col = winter_scores$colour)
- legend(x = 'bottomright', legend = community_colors$community,fill = community_colors$colour,
-        cex = 0.5)
-```
-
-![](narrative_files/figure-markdown_github/explore%20axes-3.png)
-
-``` r
- ### Axes through time
- 
-all_axes <- inner_join(summer_axes, winter_axes, by = 'year')
-
-axismin = min(all_axes[,2:7])
-axismax = max(all_axes[,2:7])
-
-axis_cols <- viridis::viridis(6)
-cpt_years <- c(1984, 1990, 1999, 2010)
-plot(all_axes$year, all_axes$SummerPCoAxis_1, type ='n', ylim = c(axismin, axismax))
-for(i in 1:6) {
-  lines(all_axes$year, all_axes[,i+1], col = axis_cols[i])
-}
-for(i in 1:4) {
-  abline(v = cpt_years[i], col = 'red')
-}
-legend(x = 'bottomright', legend = colnames(all_axes)[2:7],fill = axis_cols,
-        cex = 0.5)
-```
-
-![](narrative_files/figure-markdown_github/explore%20axes-4.png)
-
-``` r
-plot(all_axes$year, all_axes$WinterPCoAxis_1, type = 'l', col = axis_cols[4])
-abline(v = cpt_years[2], col = 'red')
-```
-
-![](narrative_files/figure-markdown_github/explore%20axes-5.png)
-
-``` r
-rm(list=ls())
-```
+*E. ciculatum* scores highly for Winter axis 2, and no other axis.
 
 Partial RDA
 -----------
@@ -416,6 +311,7 @@ Restricted to years with both a winter & summer census (n = 27).
 Used rodent data, summarized yearly, transformed via Hellinger transformation.
 
 ``` r
+# Load rodent data, winter axes, and summer axes
 rodents <- read.csv('data/rodents-adjusted.csv', 
                     stringsAsFactors = F)
 
@@ -425,27 +321,39 @@ summer_axes <- read.csv('models/summer_pcoa_axes.csv',
 winter_axes <- read.csv('models/winter_pcoa_axes.csv',
                         stringsAsFactors = F)
 
-
+# Join axes & year to make a predictor values table
 pred_vals <- inner_join(winter_axes, summer_axes, by = 'year')
 
+# Filter rodents to control plots & year with plant data
 rodents <- filter(rodents, year %in% pred_vals$year, 
                   treatment == 'control') %>%
   select(-year, -treatment)
 
-pred_vals_noy <- select(pred_vals, -year)
-pred_vals_y <- select(pred_vals, year)
-
+# Hellinger transformation on rodent data
 rodents_hel <- decostand(rodents, 'hellinger')
+```
 
-rodents_prda <- rda(rodents_hel ~ . + Condition(pred_vals_y$year), pred_vals_noy)
+Partial RDA
+===========
 
+``` r
+# Partial RDA with all axes, conditioned on year
+rodents_prda <- rda(rodents_hel ~ WinterPCoAxis_1 + 
+                      WinterPCoAxis_2 + 
+                      WinterPCoAxis_3 +
+                      SummerPCoAxis_1 + 
+                      SummerPCoAxis_2 + 
+                      SummerPCoAxis_3 +
+                      Condition(year), pred_vals)
+
+# Evaluate R2 and significance of global model (via permutation test)
 R2 <- RsquareAdj(rodents_prda)$r.squared
 R2adj <- RsquareAdj(rodents_prda)$adj.r.squared
 
 R2
 ```
 
-    ## [1] 0.187431
+    ## [1] 0.3612209
 
 ``` r
 R2adj
@@ -461,10 +369,10 @@ anova(rodents_prda, step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(pred_vals_y$year), data = pred_vals_noy)
-    ##          Df Variance      F Pr(>F)  
-    ## Model     6 0.032671 1.8312  0.033 *
-    ## Residual 25 0.074337                
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(year), data = pred_vals)
+    ##          Df Variance      F Pr(>F)    
+    ## Model     6 0.060217 4.7001  0.001 ***
+    ## Residual 19 0.040571                  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -477,20 +385,21 @@ anova(rodents_prda, by = "axis", step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(pred_vals_y$year), data = pred_vals_noy)
-    ##          Df Variance      F Pr(>F)
-    ## RDA1      1 0.014721 4.9507  0.196
-    ## RDA2      1 0.010120 3.4034  0.327
-    ## RDA3      1 0.004418 1.4858  0.816
-    ## RDA4      1 0.002593 0.8722  0.914
-    ## RDA5      1 0.000606 0.2038  1.000
-    ## RDA6      1 0.000213 0.0715  1.000
-    ## Residual 25 0.074337
-
-Find the most parsimonious model...
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3 + Condition(year), data = pred_vals)
+    ##          Df Variance       F Pr(>F)    
+    ## RDA1      1 0.040712 19.0661  0.001 ***
+    ## RDA2      1 0.012714  5.9542  0.002 ** 
+    ## RDA3      1 0.003260  1.5268  0.781    
+    ## RDA4      1 0.002051  0.9606  0.919    
+    ## RDA5      1 0.001033  0.4840  0.993    
+    ## RDA6      1 0.000446  0.2090  0.994    
+    ## Residual 19 0.040571                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
-set.seed(11)
+# Find the most parsimonious model:
+set.seed(1)
 step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formula(rodents_prda), 
                            R2scope = F, direction = "forward", pstep = 1000)
 ```
@@ -498,67 +407,91 @@ step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formu
     ## Step: R2.adj= 0 
     ## Call: rodents_hel ~ 1 
     ##  
-    ##                    R2.adjusted
-    ## + WinterPCoAxis_1  0.173825176
-    ## + SummerPCoAxis_1  0.133960638
-    ## + SummerPCoAxis_2  0.132569805
-    ## + WinterPCoAxis_2  0.114392435
-    ## + WinterPCoAxis_3  0.018292889
-    ## <none>             0.000000000
-    ## + SummerPCoAxis_3 -0.009202931
+    ##                   R2.adjusted
+    ## + WinterPCoAxis_1  0.46690627
+    ## + SummerPCoAxis_1  0.22573181
+    ## + WinterPCoAxis_3  0.06434779
+    ## + WinterPCoAxis_2  0.06168323
+    ## + SummerPCoAxis_2  0.04435527
+    ## + SummerPCoAxis_3  0.01242937
+    ## <none>             0.00000000
     ## 
     ##                   Df     AIC      F Pr(>F)   
-    ## + WinterPCoAxis_1  1 -62.013 7.7327  0.004 **
+    ## + WinterPCoAxis_1  1 -63.434 23.772  0.002 **
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Step: R2.adj= 0.1738252 
+    ## Step: R2.adj= 0.4669063 
     ## Call: rodents_hel ~ WinterPCoAxis_1 
     ##  
     ##                   R2.adjusted
-    ## + WinterPCoAxis_2   0.3062469
-    ## + SummerPCoAxis_2   0.2720064
-    ## + WinterPCoAxis_3   0.2012075
-    ## + SummerPCoAxis_1   0.1854104
-    ## + SummerPCoAxis_3   0.1813034
-    ## <none>              0.1738252
-    ## 
-    ##                   Df    AIC      F Pr(>F)   
-    ## + WinterPCoAxis_2  1 -66.86 6.9172  0.002 **
-    ## ---
-    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-    ## 
-    ## Step: R2.adj= 0.3062469 
-    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 
-    ##  
-    ##                   R2.adjusted
-    ## + SummerPCoAxis_2   0.3674221
-    ## + WinterPCoAxis_3   0.3498341
-    ## + SummerPCoAxis_1   0.3384797
-    ## + SummerPCoAxis_3   0.3077858
-    ## <none>              0.3062469
+    ## + WinterPCoAxis_3   0.5354021
+    ## + WinterPCoAxis_2   0.5196228
+    ## + SummerPCoAxis_2   0.5130107
+    ## + SummerPCoAxis_1   0.5017403
+    ## + SummerPCoAxis_3   0.4797432
+    ## <none>              0.4669063
     ## 
     ##                   Df     AIC      F Pr(>F)   
-    ## + SummerPCoAxis_2  1 -69.025 3.9012  0.008 **
+    ## + WinterPCoAxis_3  1 -66.249 4.6858  0.002 **
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Step: R2.adj= 0.3674221 
-    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + SummerPCoAxis_2 
+    ## Step: R2.adj= 0.5354021 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 
     ##  
     ##                   R2.adjusted
-    ## + WinterPCoAxis_3   0.3776844
-    ## + SummerPCoAxis_1   0.3740554
-    ## + SummerPCoAxis_3   0.3714096
-    ## <none>              0.3674221
+    ## + WinterPCoAxis_2   0.5905277
+    ## + SummerPCoAxis_2   0.5837467
+    ## + SummerPCoAxis_1   0.5753749
+    ## + SummerPCoAxis_3   0.5526490
+    ## <none>              0.5354021
     ## 
-    ##                   Df     AIC      F Pr(>F)
-    ## + WinterPCoAxis_3  1 -68.723 1.4782    0.2
+    ##                   Df     AIC     F Pr(>F)   
+    ## + WinterPCoAxis_2  1 -68.808 4.231  0.002 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.5905277 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 
+    ##  
+    ##                   R2.adjusted
+    ## + SummerPCoAxis_2   0.6235862
+    ## + SummerPCoAxis_3   0.6110886
+    ## + SummerPCoAxis_1   0.5980486
+    ## <none>              0.5905277
+    ## 
+    ##                   Df     AIC    F Pr(>F)   
+    ## + SummerPCoAxis_2  1 -70.281 3.02  0.002 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.6235862 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      SummerPCoAxis_2 
+    ##  
+    ##                   R2.adjusted
+    ## + SummerPCoAxis_3   0.6461832
+    ## + SummerPCoAxis_1   0.6323416
+    ## <none>              0.6235862
+    ## 
+    ##                   Df     AIC      F Pr(>F)  
+    ## + SummerPCoAxis_3  1 -71.209 2.4051  0.034 *
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.6461832 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      SummerPCoAxis_2 + SummerPCoAxis_3 
+    ##  
+    ##                   R2.adjusted
+    ## <none>              0.6461832
+    ## + SummerPCoAxis_1   0.6433899
 
 ``` r
-# Most parsimonious is Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 
+# Most parsimonious is Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      SummerPCoAxis_2
 
-rod_prda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2  + Condition(pred_vals_y$year), pred_vals_noy)
+# Evaluate the R2 and significance of the most parsimonious model
+
+rod_prda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2 + Condition(year), pred_vals)
 
 pR2p <- RsquareAdj(rod_prda_pars)$r.squared
 pR2adjp <- RsquareAdj(rod_prda_pars)$adj.r.squared
@@ -566,7 +499,7 @@ pR2adjp <- RsquareAdj(rod_prda_pars)$adj.r.squared
 pR2p
 ```
 
-    ## [1] 0.05830529
+    ## [1] 0.3358357
 
 ``` r
 pR2adjp
@@ -582,10 +515,12 @@ anova(rod_prda_pars, step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + Condition(pred_vals_y$year), data = pred_vals_noy)
-    ##          Df Variance      F Pr(>F)
-    ## Model     2 0.010163 1.5217  0.163
-    ## Residual 29 0.096845
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2 + Condition(year), data = pred_vals)
+    ##          Df Variance      F Pr(>F)    
+    ## Model     4 0.055986 6.5604  0.001 ***
+    ## Residual 21 0.044803                  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
 anova(rod_prda_pars, by = "axis", step = 1000)
@@ -596,17 +531,24 @@ anova(rod_prda_pars, by = "axis", step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_2 + Condition(pred_vals_y$year), data = pred_vals_noy)
-    ##          Df Variance      F Pr(>F)
-    ## RDA1      1 0.009390 2.8117  0.102
-    ## RDA2      1 0.000773 0.2316  0.966
-    ## Residual 29 0.096845
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2 + Condition(year), data = pred_vals)
+    ##          Df Variance       F Pr(>F)    
+    ## RDA1      1 0.040659 19.0578  0.001 ***
+    ## RDA2      1 0.011742  5.5036  0.001 ***
+    ## RDA3      1 0.003100  1.4530  0.416    
+    ## RDA4      1 0.000485  0.2272  0.984    
+    ## Residual 21 0.044803                   
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Only the first 2 axes - Winter 1 and 3 - are significant.
 
 Variance partitioning
 ---------------------
 
 ``` r
-rod_ppart <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~  WinterPCoAxis_2, ~ pred_vals_y$year, data = pred_vals_noy)
+# Run variance partitioning on significant axes of the most parsimonious RDA
+rod_ppart <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~  WinterPCoAxis_3, ~ year, data = pred_vals)
 rod_ppart
 ```
 
@@ -614,102 +556,75 @@ rod_ppart
     ## Partition of variance in RDA 
     ## 
     ## Call: varpart(Y = rodents_hel, X = ~WinterPCoAxis_1,
-    ## ~WinterPCoAxis_2, ~pred_vals_y$year, data = pred_vals_noy)
+    ## ~WinterPCoAxis_3, ~year, data = pred_vals)
     ## 
     ## Explanatory tables:
     ## X1:  ~WinterPCoAxis_1
-    ## X2:  ~WinterPCoAxis_2
-    ## X3:  ~pred_vals_y$year 
+    ## X2:  ~WinterPCoAxis_3
+    ## X3:  ~year 
     ## 
     ## No. of explanatory tables: 3 
-    ## Total variation (SS): 5.5779 
-    ##             Variance: 0.17431 
-    ## No. of observations: 33 
+    ## Total variation (SS): 4.3343 
+    ##             Variance: 0.16671 
+    ## No. of observations: 27 
     ## 
     ## Partition table:
     ##                       Df R.square Adj.R.square Testable
-    ## [a+d+f+g] = X1         1  0.19964      0.17383     TRUE
-    ## [b+d+e+g] = X2         1  0.14207      0.11439     TRUE
-    ## [c+e+f+g] = X3         1  0.38610      0.36630     TRUE
-    ## [a+b+d+e+f+g] = X1+X2  2  0.34961      0.30625     TRUE
-    ## [a+c+d+e+f+g] = X1+X3  2  0.41247      0.37330     TRUE
-    ## [b+c+d+e+f+g] = X2+X3  2  0.39166      0.35110     TRUE
-    ## [a+b+c+d+e+f+g] = All  3  0.44441      0.38693     TRUE
+    ## [a+d+f+g] = X1         1  0.48741      0.46691     TRUE
+    ## [b+d+e+g] = X2         1  0.10033      0.06435     TRUE
+    ## [c+e+f+g] = X3         1  0.39541      0.37123     TRUE
+    ## [a+b+d+e+f+g] = X1+X2  2  0.57114      0.53540     TRUE
+    ## [a+c+d+e+f+g] = X1+X3  2  0.56254      0.52608     TRUE
+    ## [b+c+d+e+f+g] = X2+X3  2  0.51259      0.47197     TRUE
+    ## [a+b+c+d+e+f+g] = All  3  0.62289      0.57370     TRUE
     ## Individual fractions                                   
-    ## [a] = X1 | X2+X3       1               0.03583     TRUE
-    ## [b] = X2 | X1+X3       1               0.01363     TRUE
-    ## [c] = X3 | X1+X2       1               0.08069     TRUE
-    ## [d]                    0              -0.02883    FALSE
-    ## [e]                    0               0.11879    FALSE
-    ## [f]                    0               0.15603    FALSE
-    ## [g]                    0               0.01080    FALSE
-    ## [h] = Residuals                        0.61307    FALSE
+    ## [a] = X1 | X2+X3       1               0.10174     TRUE
+    ## [b] = X2 | X1+X3       1               0.04762     TRUE
+    ## [c] = X3 | X1+X2       1               0.03830     TRUE
+    ## [d]                    0               0.05312    FALSE
+    ## [e]                    0               0.02088    FALSE
+    ## [f]                    0               0.36932    FALSE
+    ## [g]                    0              -0.05727    FALSE
+    ## [h] = Residuals                        0.42630    FALSE
     ## Controlling 1 table X                                  
-    ## [a+d] = X1 | X3        1               0.00700     TRUE
-    ## [a+f] = X1 | X2        1               0.19185     TRUE
-    ## [b+d] = X2 | X3        1              -0.01520     TRUE
-    ## [b+e] = X2 | X1        1               0.13242     TRUE
-    ## [c+e] = X3 | X1        1               0.19948     TRUE
-    ## [c+f] = X3 | X2        1               0.23671     TRUE
+    ## [a+d] = X1 | X3        1               0.15486     TRUE
+    ## [a+f] = X1 | X2        1               0.47105     TRUE
+    ## [b+d] = X2 | X3        1               0.10074     TRUE
+    ## [b+e] = X2 | X1        1               0.06850     TRUE
+    ## [c+e] = X3 | X1        1               0.05918     TRUE
+    ## [c+f] = X3 | X2        1               0.40762     TRUE
     ## ---
     ## Use function 'rda' to test significance of fractions of interest
 
 ``` r
-plot(rod_ppart, digits = 2)
+plot(rod_ppart, digits = 2, Xnames = c('Winter1', 'Winter3', 'year'))
+title(main="Variance partitioning - Partial RDA")
 ```
 
 ![](narrative_files/figure-markdown_github/partial%20variance%20partitioning-1.png)
 
-WinterPCoAxis\_1 combined with year has the largest chunk (.34); on its own, WinterPCoAxis\_1 explains an additional .1
-
-### Years - rodents comparison
-
-``` r
-plot(pred_vals$year, pred_vals$WinterPCoAxis_1)
-abline(v = 1990, col = 'red')
-```
-
-![](narrative_files/figure-markdown_github/plot%20winter%20pcoa1%20v%20year-1.png)
-
-``` r
-colnames(rodents)
-```
-
-    ##  [1] "BA" "DM" "DO" "DS" "PB" "PE" "PF" "PH" "PI" "PL" "PM" "PP" "RF" "RM"
-    ## [15] "RO"
-
-``` r
-rodents_props <- rodents/rowSums(rodents)
-
-
-plot(pred_vals$year, rodents_props$DS, col = 'blue')
-points(pred_vals$year, rodents_props$PE, col = 'green')
-points(pred_vals$year, rodents_props$RM, col = 'purple')
-points(pred_vals$year, rodents_props$DM, col = 'pink')
-abline(v = 1990, col = 'red')
-```
-
-![](narrative_files/figure-markdown_github/plot%20winter%20pcoa1%20v%20year-2.png)
+WinterPCoAxis\_1 combined with year has the largest chunk (.369); on its own, WinterPCoAxis\_1 explains an additional .1
 
 Regular RDA
 -----------
 
 ``` r
+# RDA on all variables (no condition)
 rodents_rda <- rda(rodents_hel ~ ., pred_vals)
 
+# R2 and significance test for global model
 R2 <- RsquareAdj(rodents_rda)$r.squared
 R2adj <- RsquareAdj(rodents_rda)$adj.r.squared
-
 R2
 ```
 
-    ## [1] 0.5735345
+    ## [1] 0.7566306
 
 ``` r
 R2adj
 ```
 
-    ## [1] 0.4541242
+    ## [1] 0.6669682
 
 ``` r
 anova(rodents_rda, step = 1000)
@@ -721,8 +636,8 @@ anova(rodents_rda, step = 1000)
     ## 
     ## Model: rda(formula = rodents_hel ~ year + WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3, data = pred_vals)
     ##          Df Variance      F Pr(>F)    
-    ## Model     7 0.099973 4.8031  0.001 ***
-    ## Residual 25 0.074337                  
+    ## Model     7 0.126134 8.4387  0.001 ***
+    ## Residual 19 0.040571                  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -737,21 +652,20 @@ anova(rodents_rda, by = "axis", step = 1000)
     ## 
     ## Model: rda(formula = rodents_hel ~ year + WinterPCoAxis_1 + WinterPCoAxis_2 + WinterPCoAxis_3 + SummerPCoAxis_1 + SummerPCoAxis_2 + SummerPCoAxis_3, data = pred_vals)
     ##          Df Variance       F Pr(>F)    
-    ## RDA1      1 0.071273 23.9695  0.001 ***
-    ## RDA2      1 0.011673  3.9258  0.277    
-    ## RDA3      1 0.010046  3.3786  0.302    
-    ## RDA4      1 0.003956  1.3305  0.845    
-    ## RDA5      1 0.002476  0.8328  0.901    
-    ## RDA6      1 0.000348  0.1172  1.000    
-    ## RDA7      1 0.000199  0.0669  1.000    
-    ## Residual 25 0.074337                   
+    ## RDA1      1 0.090448 42.3583  0.001 ***
+    ## RDA2      1 0.018913  8.8575  0.001 ***
+    ## RDA3      1 0.010766  5.0418  0.006 ** 
+    ## RDA4      1 0.003226  1.5108  0.798    
+    ## RDA5      1 0.001655  0.7749  0.982    
+    ## RDA6      1 0.000730  0.3418  0.998    
+    ## RDA7      1 0.000396  0.1856  0.993    
+    ## Residual 19 0.040571                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Find the most parsimonious model...
-
 ``` r
-set.seed(11)
+# Find the most parsimonious model
+set.seed(1)
 step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formula(rodents_rda), 
                            R2scope = F, direction = "forward", pstep = 1000)
 ```
@@ -759,56 +673,112 @@ step.forward <- ordiR2step(rda(rodents_hel ~ 1, data = pred_vals), scope = formu
     ## Step: R2.adj= 0 
     ## Call: rodents_hel ~ 1 
     ##  
-    ##                    R2.adjusted
-    ## + year             0.366300432
-    ## + WinterPCoAxis_1  0.173825176
-    ## + SummerPCoAxis_1  0.133960638
-    ## + SummerPCoAxis_2  0.132569805
-    ## + WinterPCoAxis_2  0.114392435
-    ## + WinterPCoAxis_3  0.018292889
-    ## <none>             0.000000000
-    ## + SummerPCoAxis_3 -0.009202931
+    ##                   R2.adjusted
+    ## + WinterPCoAxis_1  0.46690627
+    ## + year             0.37122615
+    ## + SummerPCoAxis_1  0.22573181
+    ## + WinterPCoAxis_3  0.06434779
+    ## + WinterPCoAxis_2  0.06168323
+    ## + SummerPCoAxis_2  0.04435527
+    ## + SummerPCoAxis_3  0.01242937
+    ## <none>             0.00000000
     ## 
-    ##        Df     AIC      F Pr(>F)   
-    ## + year  1 -70.766 19.497  0.002 **
+    ##                   Df     AIC      F Pr(>F)   
+    ## + WinterPCoAxis_1  1 -63.434 23.772  0.002 **
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Step: R2.adj= 0.3663004 
-    ## Call: rodents_hel ~ year 
+    ## Step: R2.adj= 0.4669063 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 
     ##  
     ##                   R2.adjusted
-    ## + WinterPCoAxis_3   0.3957853
-    ## + SummerPCoAxis_2   0.3938742
-    ## + SummerPCoAxis_1   0.3918242
-    ## + SummerPCoAxis_3   0.3757239
-    ## + WinterPCoAxis_1   0.3733018
-    ## <none>              0.3663004
-    ## + WinterPCoAxis_2   0.3511047
+    ## + WinterPCoAxis_3   0.5354021
+    ## + year              0.5260839
+    ## + WinterPCoAxis_2   0.5196228
+    ## + SummerPCoAxis_2   0.5130107
+    ## + SummerPCoAxis_1   0.5017403
+    ## + SummerPCoAxis_3   0.4797432
+    ## <none>              0.4669063
     ## 
-    ##                   Df    AIC      F Pr(>F)  
-    ## + WinterPCoAxis_3  1 -71.42 2.5128  0.052 .
+    ##                   Df     AIC      F Pr(>F)   
+    ## + WinterPCoAxis_3  1 -66.249 4.6858  0.002 **
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.5354021 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 
+    ##  
+    ##                   R2.adjusted
+    ## + WinterPCoAxis_2   0.5905277
+    ## + SummerPCoAxis_2   0.5837467
+    ## + SummerPCoAxis_1   0.5753749
+    ## + year              0.5737045
+    ## + SummerPCoAxis_3   0.5526490
+    ## <none>              0.5354021
+    ## 
+    ##                   Df     AIC     F Pr(>F)   
+    ## + WinterPCoAxis_2  1 -68.808 4.231  0.002 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.5905277 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 
+    ##  
+    ##                   R2.adjusted
+    ## + year              0.6288360
+    ## + SummerPCoAxis_2   0.6235862
+    ## + SummerPCoAxis_3   0.6110886
+    ## + SummerPCoAxis_1   0.5980486
+    ## <none>              0.5905277
+    ## 
+    ##        Df     AIC      F Pr(>F)   
+    ## + year  1 -70.661 3.3739  0.002 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.628836 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      year 
+    ##  
+    ##                   R2.adjusted
+    ## + SummerPCoAxis_2   0.6672563
+    ## <none>              0.6288360
+    ## + SummerPCoAxis_1   0.6275715
+    ## + SummerPCoAxis_3   0.6268560
+    ## 
+    ##                   Df     AIC      F Pr(>F)   
+    ## + SummerPCoAxis_2  1 -72.867 3.5402  0.002 **
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Step: R2.adj= 0.6672563 
+    ## Call: rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +      year + SummerPCoAxis_2 
+    ##  
+    ##                   R2.adjusted
+    ## + SummerPCoAxis_1   0.6696281
+    ## + SummerPCoAxis_3   0.6676086
+    ## <none>              0.6672563
+    ## 
+    ##                   Df     AIC      F Pr(>F)
+    ## + SummerPCoAxis_1  1 -72.378 1.1508  0.322
 
 ``` r
-# Most parsimonious is rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +  SummerPCoAxis_2 
+# Most parsimonious is rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 +  year 
 
-rod_rda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2, pred_vals)
+rod_rda_pars <- rda(rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + year, pred_vals)
 
+# R2 and significance for most parsimonious model
 R2p <- RsquareAdj(rod_rda_pars)$r.squared
 R2adjp <- RsquareAdj(rod_rda_pars)$adj.r.squared
-
 R2p
 ```
 
-    ## [1] 0.4554739
+    ## [1] 0.6859381
 
 ``` r
 R2adjp
 ```
 
-    ## [1] 0.3776844
+    ## [1] 0.628836
 
 ``` r
 anova(rod_rda_pars, step = 1000)
@@ -818,10 +788,10 @@ anova(rod_rda_pars, step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2, data = pred_vals)
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + year, data = pred_vals)
     ##          Df Variance      F Pr(>F)    
-    ## Model     4 0.079394 5.8552  0.001 ***
-    ## Residual 28 0.094916                  
+    ## Model     4 0.114349 12.012  0.001 ***
+    ## Residual 22 0.052356                  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -834,18 +804,24 @@ anova(rod_rda_pars, by = "axis", step = 1000)
     ## Permutation: free
     ## Number of permutations: 999
     ## 
-    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + SummerPCoAxis_2, data = pred_vals)
+    ## Model: rda(formula = rodents_hel ~ WinterPCoAxis_1 + WinterPCoAxis_3 + WinterPCoAxis_2 + year, data = pred_vals)
     ##          Df Variance       F Pr(>F)    
-    ## RDA1      1 0.065300 19.2634  0.001 ***
-    ## RDA2      1 0.009696  2.8604  0.197    
-    ## RDA3      1 0.003906  1.1522  0.619    
-    ## RDA4      1 0.000491  0.1449  0.995    
-    ## Residual 28 0.094916                   
+    ## RDA1      1 0.089264 37.5089  0.001 ***
+    ## RDA2      1 0.017020  7.1519  0.001 ***
+    ## RDA3      1 0.007588  3.1884  0.016 *  
+    ## RDA4      1 0.000478  0.2007  0.992    
+    ## Residual 22 0.052356                   
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ``` r
-rod_part <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~ WinterPCoAxis_3, ~  WinterPCoAxis_2, ~ SummerPCoAxis_2, data = pred_vals)
+# The first 3 axes are significant (winter 1, winter 3, winter 2)
+```
+
+### Variance partitioning on significant axes for regular RDA
+
+``` r
+rod_part <- varpart(rodents_hel, ~ WinterPCoAxis_1, ~ WinterPCoAxis_3, ~  WinterPCoAxis_2, data = pred_vals)
 rod_part
 ```
 
@@ -853,85 +829,79 @@ rod_part
     ## Partition of variance in RDA 
     ## 
     ## Call: varpart(Y = rodents_hel, X = ~WinterPCoAxis_1,
-    ## ~WinterPCoAxis_3, ~WinterPCoAxis_2, ~SummerPCoAxis_2, data =
-    ## pred_vals)
+    ## ~WinterPCoAxis_3, ~WinterPCoAxis_2, data = pred_vals)
     ## 
     ## Explanatory tables:
     ## X1:  ~WinterPCoAxis_1
     ## X2:  ~WinterPCoAxis_3
-    ## X3:  ~WinterPCoAxis_2
-    ## X4:  ~SummerPCoAxis_2 
+    ## X3:  ~WinterPCoAxis_2 
     ## 
-    ## No. of explanatory tables: 4 
-    ## Total variation (SS): 5.5779 
-    ##             Variance: 0.17431 
-    ## No. of observations: 33 
+    ## No. of explanatory tables: 3 
+    ## Total variation (SS): 4.3343 
+    ##             Variance: 0.16671 
+    ## No. of observations: 27 
     ## 
     ## Partition table:
-    ##                             Df R.square Adj.R.square Testable
-    ## [aeghklno] = X1              1  0.19964      0.17383     TRUE
-    ## [befiklmo] = X2              1  0.04897      0.01829     TRUE
-    ## [cfgjlmno] = X3              1  0.14207      0.11439     TRUE
-    ## [dhijkmno] = X4              1  0.15968      0.13257     TRUE
-    ## [abefghiklmno] = X1+X2       2  0.25113      0.20121     TRUE
-    ## [acefghjklmno] = X1+X3       2  0.34961      0.30625     TRUE
-    ## [adeghijklmno] = X1+X4       2  0.31751      0.27201     TRUE
-    ## [bcefgijklmno] = X2+X3       2  0.19820      0.14475     TRUE
-    ## [bdefhijklmno] = X2+X4       2  0.21116      0.15857     TRUE
-    ## [cdfghijklmno] = X3+X4       2  0.25048      0.20052     TRUE
-    ## [abcefghijklmno] = X1+X2+X3  3  0.41079      0.34983     TRUE
-    ## [abdefghijklmno] = X1+X2+X4  3  0.34923      0.28191     TRUE
-    ## [acdefghijklmno] = X1+X3+X4  3  0.42673      0.36742     TRUE
-    ## [bcdefghijklmno] = X2+X3+X4  3  0.28683      0.21305     TRUE
-    ## [abcdefghijklmno] = All      4  0.45547      0.37768     TRUE
-    ## Individual fractions                                         
-    ## [a] = X1 | X2+X3+X4          1               0.16463     TRUE
-    ## [b] = X2 | X1+X3+X4          1               0.01026     TRUE
-    ## [c] = X3 | X1+X2+X4          1               0.09577     TRUE
-    ## [d] = X4 | X1+X2+X3          1               0.02785     TRUE
-    ## [e]                          0               0.00227    FALSE
-    ## [f]                          0              -0.00036    FALSE
-    ## [g]                          0              -0.04129    FALSE
-    ## [h]                          0               0.04045    FALSE
-    ## [i]                          0               0.03332    FALSE
-    ## [j]                          0               0.05285    FALSE
-    ## [k]                          0              -0.01551    FALSE
-    ## [l]                          0               0.01382    FALSE
-    ## [m]                          0              -0.01585    FALSE
-    ## [n]                          0               0.01912    FALSE
-    ## [o]                          0              -0.00968    FALSE
-    ## [p] = Residuals              0               0.62232    FALSE
-    ## Controlling 2 tables X                                       
-    ## [ae] = X1 | X3+X4            1               0.16690     TRUE
-    ## [ag] = X1 | X2+X4            1               0.12334     TRUE
-    ## [ah] = X1 | X2+X3            1               0.20509     TRUE
-    ## [be] = X2 | X3+X4            1               0.01253     TRUE
-    ## [bf] = X2 | X1+X4            1               0.00990     TRUE
-    ## [bi] = X2 | X1+X3            1               0.04359     TRUE
-    ## [cf] = X3 | X1+X4            1               0.09542     TRUE
-    ## [cg] = X3 | X2+X4            1               0.05448     TRUE
-    ## [cj] = X3 | X1+X2            1               0.14863     TRUE
-    ## [dh] = X4 | X2+X3            1               0.06831     TRUE
-    ## [di] = X4 | X1+X3            1               0.06118     TRUE
-    ## [dj] = X4 | X1+X2            1               0.08070     TRUE
-    ## Controlling 1 table X                                        
-    ## [aghn] = X1 | X2             1               0.18291     TRUE
-    ## [aehk] = X1 | X3             1               0.19185     TRUE
-    ## [aegl] = X1 | X4             1               0.13944     TRUE
-    ## [bfim] = X2 | X1             1               0.02738     TRUE
-    ## [beik] = X2 | X3             1               0.03035     TRUE
-    ## [befl] = X2 | X4             1               0.02600     TRUE
-    ## [cfjm] = X3 | X1             1               0.13242     TRUE
-    ## [cgjn] = X3 | X2             1               0.12645     TRUE
-    ## [cfgl] = X3 | X4             1               0.06795     TRUE
-    ## [dijm] = X4 | X1             1               0.09818     TRUE
-    ## [dhjn] = X4 | X2             1               0.14028     TRUE
-    ## [dhik] = X4 | X3             1               0.08612     TRUE
+    ##                       Df R.square Adj.R.square Testable
+    ## [a+d+f+g] = X1         1  0.48741      0.46691     TRUE
+    ## [b+d+e+g] = X2         1  0.10033      0.06435     TRUE
+    ## [c+e+f+g] = X3         1  0.09777      0.06168     TRUE
+    ## [a+b+d+e+f+g] = X1+X2  2  0.57114      0.53540     TRUE
+    ## [a+c+d+e+f+g] = X1+X3  2  0.55657      0.51962     TRUE
+    ## [b+c+d+e+f+g] = X2+X3  2  0.20467      0.13840     TRUE
+    ## [a+b+c+d+e+f+g] = All  3  0.63777      0.59053     TRUE
+    ## Individual fractions                                   
+    ## [a] = X1 | X2+X3       1               0.45213     TRUE
+    ## [b] = X2 | X1+X3       1               0.07090     TRUE
+    ## [c] = X3 | X1+X2       1               0.05513     TRUE
+    ## [d]                    0               0.00581    FALSE
+    ## [e]                    0              -0.00241    FALSE
+    ## [f]                    0               0.01892    FALSE
+    ## [g]                    0              -0.00996    FALSE
+    ## [h] = Residuals                        0.40947    FALSE
+    ## Controlling 1 table X                                  
+    ## [a+d] = X1 | X3        1               0.45794     TRUE
+    ## [a+f] = X1 | X2        1               0.47105     TRUE
+    ## [b+d] = X2 | X3        1               0.07671     TRUE
+    ## [b+e] = X2 | X1        1               0.06850     TRUE
+    ## [c+e] = X3 | X1        1               0.05272     TRUE
+    ## [c+f] = X3 | X2        1               0.07405     TRUE
     ## ---
     ## Use function 'rda' to test significance of fractions of interest
 
 ``` r
-plot(rod_part, digits = 2)
+plot(rod_part, digits = 2, Xnames = c('Winter1', 'Winter3','Winter2'))
+title(main="Variance partitioning - unconditioned RDA")
 ```
 
-![](narrative_files/figure-markdown_github/regular%20variance%20partitioning-1.png)
+![](narrative_files/figure-markdown_github/regular%20variance%20partitioning-1.png) Winter PCoA 1 still captures most of the variation.
+
+### Years - rodents comparison
+
+Plot winter PCoA1, year, and DS % abundances.
+
+``` r
+par(mfrow = c(1, 2))
+rodents_props <- rodents/rowSums(rodents)
+
+plot(pred_vals$year, pred_vals$WinterPCoAxis_1)
+title(main="Winter axis 1")
+abline(v = 1990, col = 'red')
+
+plot(pred_vals$year, rodents_props$DS, col = 'blue')
+title(main = 'D. spectabilis % abundance')
+abline(v = 1990, col = 'red')
+```
+
+![](narrative_files/figure-markdown_github/plot%20winter%20pcoa1%20v%20year-1.png)
+
+``` r
+# Important species in axis 1
+# Save the ranked list of highest absolute value-scoring species for 
+# winter axis 1. 
+impt_species <- winter_scores_ranks %>%
+  select(speciescode, axis1_rank, waxis1) %>%
+  arrange(axis1_rank)
+
+write.csv(impt_species, 'models/winter_axis_1.csv')
+```

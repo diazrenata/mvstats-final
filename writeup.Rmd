@@ -23,7 +23,7 @@ For this project, I used the entire rodent timeseries, standardized according to
 
 There are X species in the combined winter and plant datasets. These data do not lend themselves to current implementations of LDA for ecological data, so I used a Principle Coordinates Analysis to reduce the dimensionality of the plant communities (deconstand in vegan). The communities are known to be largely distinct, so I ran PCoA's on summer and winter data separately. Prior to running each PCoA, I removed species that did not occur at all in the season in question. I used a Wisconsin transformation (function in the vegan package) on the raw abundance values, and then used a Bray-Curtis dissimilarity matrix (function) for the PCoA.
 
-For both communities, scree plots showed inflection points at approximately three axes, and three axes captured a substantial proportion of variation (%s.) Although we have relatively little information about the natural history of particular plant species, I explored two known features of the plant community: a general decline in large-seeded species compared to small-seeded species (Valone 2017), and the rapid establishment of the invasive erio aber in the 1990s (Allington). I used weighted scores and regressions () to test whether seed mass predicted species' scores on PC axes, and I checked scores for erio aber on all axes. Because the first axis for the winter community was consistently important, I specifically explored its most strongly contributing species, plotted its trajectory over time, and plotted its relationship to the rodent species.
+For both communities, scree plots showed inflection points at approximately three axes, and three axes captured a substantial proportion of variation (%s.) Although we have relatively little information about the natural history of particular plant species, I explored two known features of the plant community: a general decline in large-seeded species compared to small-seeded species (Valone 2017), and the rapid establishment of the invasive _Erodium cicutarium_ in the 1990s (Allington et al 2013). I used weighted scores and regressions () to test whether seed mass predicted species' scores on PC axes, and I checked the weighted-average species score for _E. cicutarium_ on all axes. Because the first axis for the winter community was consistently important, I specifically explored its most strongly contributing species, plotted its trajectory over time, and plotted its relationship to the rodent species.
 
 ### Analysis: Relating plant and rodent communities (RDA)
 
@@ -32,7 +32,7 @@ I used redundancy analysis to relate the first three axes of each plant communit
 ## Results
 
 ### PCoA
-Interestingly, seed mass did not predict a species' score for any PC axis except for axis 1 in the summer community (report p-values) . Erio aber [whatever that does].
+Seed mass did not predict a species' score for any PC axis except for axis 1 in the summer community (report p-values) . _E. cicutarium_ [whatever that does].
 
 ### Partial redundancy analysis
 LIST OR TABLE
